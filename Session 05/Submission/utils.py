@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import torch
 from torchvision import transforms
 from tqdm import tqdm
@@ -11,7 +12,28 @@ test_acc = []
 test_incorrect_pred = {"images": [], "ground_truths": [], "predicted_vals": []}
 
 
+def get_device():
+    """
+    Function to get the device to be used for training and testing.
+    """
+
+    # Check if cuda is available
+    cuda = torch.cuda.is_available()
+
+    # Based on check enable cuda if present, if not available
+    if cuda:
+        final_choice = "cuda"
+    else:
+        final_choice = "cpu"
+
+    return final_choice, torch.device(final_choice)
+
+
 def apply_mnist_image_transformations():
+    """
+    Function to apply the required transformations to the MNIST dataset.
+    """
+
     train_transforms = transforms.Compose(
         [
             transforms.RandomApply(
@@ -36,10 +58,17 @@ def apply_mnist_image_transformations():
 
 
 def GetCorrectPredCount(pPrediction, pLabels):
+    """
+    Gets the count of correct predictions.
+    """
     return pPrediction.argmax(dim=1).eq(pLabels).sum().item()
 
 
 def train(model, device, train_loader, optimizer, criterion):
+    """
+    Function to train the model on the train dataset.
+    """
+
     model.train()
     pbar = tqdm(train_loader)
 
@@ -74,6 +103,10 @@ def train(model, device, train_loader, optimizer, criterion):
 
 
 def test(model, device, test_loader, criterion):
+    """
+    Function to test the model on the test dataset.
+    """
+
     model.eval()
 
     test_loss = 0
@@ -102,3 +135,23 @@ def test(model, device, test_loader, criterion):
             100.0 * correct / len(test_loader.dataset),
         )
     )
+
+
+def plot_train_test_metrics():
+    """Plots the training and test metrics.
+
+    Returns:
+      A matplotlib figure.
+    """
+
+    fig, axs = plt.subplots(2, 2, figsize=(15, 10))
+    axs[0, 0].plot(train_losses)
+    axs[0, 0].set_title("Training Loss")
+    axs[1, 0].plot(train_acc)
+    axs[1, 0].set_title("Training Accuracy")
+    axs[0, 1].plot(test_losses)
+    axs[0, 1].set_title("Test Loss")
+    axs[1, 1].plot(test_acc)
+    axs[1, 1].set_title("Test Accuracy")
+
+    return fig
