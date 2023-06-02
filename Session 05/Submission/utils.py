@@ -57,6 +57,25 @@ def apply_mnist_image_transformations():
     return train_transforms, test_transforms
 
 
+def plot_sample_training_images(batch_data, batch_label):
+    """
+    Function to plot sample images from the training data.
+    """
+
+    fig = plt.figure()
+
+    # Display 12 images from the training data
+    for i in range(12):
+        plt.subplot(3, 4, i + 1)
+        plt.tight_layout()
+        plt.imshow(batch_data[i].squeeze(0), cmap="gray")
+        plt.title(batch_label[i].item())
+        plt.xticks([])
+        plt.yticks([])
+
+    return fig
+
+
 def GetCorrectPredCount(pPrediction, pLabels):
     """
     Gets the count of correct predictions.
@@ -157,12 +176,14 @@ def test(model, device, test_loader, criterion):
     )
 
 
-def plot_train_test_metrics():
+def plot_train_test_metrics(metrics):
     """Plots the training and test metrics.
 
     Returns:
       A matplotlib figure.
     """
+    # Get individual metrics from the list
+    train_losses, test_losses, train_acc, test_acc = metrics
 
     # Plot the graphs in a 2x2 grid showing the training and test metrics
     fig, axs = plt.subplots(2, 2, figsize=(15, 10))
