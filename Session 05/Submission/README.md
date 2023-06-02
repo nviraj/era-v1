@@ -1,6 +1,6 @@
 # [Session 5 Assignment](https://canvas.instructure.com/courses/6743641/quizzes/14478657?module_item_id=86577025)
 
-- Table of Contents
+- [Session 5 Assignment](#session-5-assignment)
   - [Assignment Objectives](#assignment-objectives)
   - [Steps followed for solving assignment](#steps-followed-for-solving-assignment)
   - [Module Contents](#module-contents)
