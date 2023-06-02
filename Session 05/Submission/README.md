@@ -26,8 +26,8 @@
 
 1. A local Conda environment was created to gain familiarity with local environments for Deep Learning
 2. Code from **Session 4** which adds loss function as criterion parameter to train and test functions was debugged and fixed in line with class solution
-3. Code was modularized into _S5.ipynb_, _models.py_ and _utils.py_. More details present in **Module Contents** section.
-4. Assignment and general documentation was added in a _README.md_ file
+3. Code was modularized into [_S5.ipynb_](S5.ipynb), [_models.py_](model.py) and [_utils.py_](utils.py). More details present in **Module Contents** section.
+4. Assignment and general documentation was added in a [_README.md_](README.md) file
 
 <br>
 
