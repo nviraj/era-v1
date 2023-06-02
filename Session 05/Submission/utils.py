@@ -46,7 +46,8 @@ def apply_mnist_image_transformations():
             transforms.Resize((28, 28)),
             # Apply random rotation to the images
             transforms.RandomRotation((-15.0, 15.0), fill=0),
-            # Convert the images to tensors and normalize the images with mean and standard deviation from the whole dataset
+            # Convert the images to tensors
+            # normalize the images with mean and standard deviation from the whole dataset
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,)),
         ]
@@ -54,7 +55,8 @@ def apply_mnist_image_transformations():
 
     # Test data transformations
     test_transforms = transforms.Compose(
-        # Convert the images to tensors and normalize the images with mean and standard deviation from the whole dataset
+        # Convert the images to tensors
+        # normalize the images with mean and standard deviation from the whole dataset
         [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
     )
 
@@ -173,12 +175,7 @@ def test(model, device, test_loader, criterion):
 
     # Print the final test loss and accuracy
     print(
-        "Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n".format(
-            test_loss,
-            correct,
-            len(test_loader.dataset),
-            100.0 * correct / len(test_loader.dataset),
-        )
+        f"Test set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100.0 * correct / len(test_loader.dataset):.2f}%)"
     )
 
 
