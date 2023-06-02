@@ -37,8 +37,6 @@
   - Contains a class called Net which defines our network and the forward function
 - [**utils.py**](utils.py)
   - Contains the following utility functions:
-    - **_Data related:_**
-      - _apply_mnist_image_transformations()_: Apply the required transformations to both train and test splits of the MNIST dataset
     - **_Train and Test Related_**
       - _get_device()_: Get the device to be used for training and testing
       - _get_correct_prediction_count()_: Get the count of correct predictions given both predictions and labels
@@ -54,7 +52,7 @@
     - Install any dependencies needed for the script in the working environment
     - Import all external and custom modules for the script
     - Initialize device used for training
-    - Define Transformations for the dataset
+    - Define Transformations for the dataset using _apply_mnist_image_transformations()_
     - Download MNIST dataset and split into 2 and apply relevant Transformation definitions
     - Load both test and train data using DataLoader with options like batch size
     - Plot sample input data

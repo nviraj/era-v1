@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import torch
-from torchvision import transforms
 from tqdm import tqdm
 
 # Data to plot accuracy and loss graphs
@@ -27,40 +26,6 @@ def get_device():
         final_choice = "cpu"
 
     return final_choice, torch.device(final_choice)
-
-
-def apply_mnist_image_transformations():
-    """
-    Function to apply the required transformations to the MNIST dataset.
-    """
-    # Apply the required transformations to the MNIST dataset
-    train_transforms = transforms.Compose(
-        [
-            # Randomly center crop the images to 22x22 and then resize to 28x28
-            transforms.RandomApply(
-                [
-                    transforms.CenterCrop(22),
-                ],
-                p=0.1,
-            ),
-            transforms.Resize((28, 28)),
-            # Apply random rotation to the images
-            transforms.RandomRotation((-15.0, 15.0), fill=0),
-            # Convert the images to tensors
-            # normalize the images with mean and standard deviation from the whole dataset
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,)),
-        ]
-    )
-
-    # Test data transformations
-    test_transforms = transforms.Compose(
-        # Convert the images to tensors
-        # normalize the images with mean and standard deviation from the whole dataset
-        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
-    )
-
-    return train_transforms, test_transforms
 
 
 def plot_sample_training_images(batch_data, batch_label):
