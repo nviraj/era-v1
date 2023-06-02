@@ -161,3 +161,7 @@ cython_debug/
 
 # Add course materials
 Course Materials/*
+
+# Data folder
+*/data/*
+data/*
