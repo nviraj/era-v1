@@ -85,7 +85,7 @@ def plot_sample_training_images(batch_data, batch_label):
 
 def get_correct_prediction_count(pPrediction, pLabels):
     """
-    Gets the count of correct predictions.
+    Function to get the count of correct predictions.
     """
     return pPrediction.argmax(dim=1).eq(pLabels).sum().item()
 
@@ -180,7 +180,9 @@ def test(model, device, test_loader, criterion):
 
 
 def plot_train_test_metrics():
-    """Plots the training and test metrics."""
+    """
+    Function to plot the training and test metrics.
+    """
 
     # Plot the graphs in a 2x2 grid showing the training and test metrics
     fig, axs = plt.subplots(2, 2, figsize=(15, 10))
