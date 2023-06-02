@@ -179,14 +179,8 @@ def test(model, device, test_loader, criterion):
     )
 
 
-def plot_train_test_metrics(metrics):
-    """Plots the training and test metrics.
-
-    Returns:
-      A matplotlib figure.
-    """
-    # Get individual metrics from the list
-    train_losses, test_losses, train_acc, test_acc = metrics
+def plot_train_test_metrics():
+    """Plots the training and test metrics."""
 
     # Plot the graphs in a 2x2 grid showing the training and test metrics
     fig, axs = plt.subplots(2, 2, figsize=(15, 10))
@@ -199,4 +193,4 @@ def plot_train_test_metrics(metrics):
     axs[1, 1].plot(test_acc)
     axs[1, 1].set_title("Test Accuracy")
 
-    return fig
+    return fig, axs
