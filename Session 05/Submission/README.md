@@ -49,8 +49,8 @@
       - _plot_train_test_metrics()_: Plot the training and test metrics
   - Contains lists to hold metrics to track accuracy and loss for both training and testing. These are used by training, testing and plotting related functions.
 - [**S5.ipynb**](S5.ipynb)
-  - Contains our end to end workflow to predict labels for MNIST dataset. This imports functions from utils and the network from models.
-  - The _flow_ is as follows:
+  - Contains our end to end workflow to predict labels for MNIST dataset. This imports functions from utils and the network from models file.
+  - The **flow** is as follows:
     - Install any dependencies needed for the script in the working environment
     - Import all external and custom modules for the script
     - Initialize device used for training
