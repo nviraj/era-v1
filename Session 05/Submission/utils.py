@@ -33,9 +33,10 @@ def apply_mnist_image_transformations():
     """
     Function to apply the required transformations to the MNIST dataset.
     """
-
+    # Apply the required transformations to the MNIST dataset
     train_transforms = transforms.Compose(
         [
+            # Randomly center crop the images to 22x22 and then resize to 28x28
             transforms.RandomApply(
                 [
                     transforms.CenterCrop(22),
@@ -43,7 +44,9 @@ def apply_mnist_image_transformations():
                 p=0.1,
             ),
             transforms.Resize((28, 28)),
+            # Apply random rotation to the images
             transforms.RandomRotation((-15.0, 15.0), fill=0),
+            # Convert the images to tensors and normalize the images with mean and standard deviation from the whole dataset
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,)),
         ]
@@ -51,6 +54,7 @@ def apply_mnist_image_transformations():
 
     # Test data transformations
     test_transforms = transforms.Compose(
+        # Convert the images to tensors and normalize the images with mean and standard deviation from the whole dataset
         [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
     )
 
@@ -62,6 +66,7 @@ def plot_sample_training_images(batch_data, batch_label):
     Function to plot sample images from the training data.
     """
 
+    # Initialize the grid of images and labels
     fig = plt.figure()
 
     # Display 12 images from the training data
@@ -76,7 +81,7 @@ def plot_sample_training_images(batch_data, batch_label):
     return fig
 
 
-def GetCorrectPredCount(pPrediction, pLabels):
+def get_correct_prediction_count(pPrediction, pLabels):
     """
     Gets the count of correct predictions.
     """
@@ -88,7 +93,7 @@ def train(model, device, train_loader, optimizer, criterion):
     Function to train the model on the train dataset.
     """
 
-    # Train the model
+    # Initialize the model to train mode
     model.train()
     # Initialize progress bar
     pbar = tqdm(train_loader)
@@ -119,7 +124,7 @@ def train(model, device, train_loader, optimizer, criterion):
         optimizer.step()
 
         # Get the count of correct predictions
-        correct += GetCorrectPredCount(pred, target)
+        correct += get_correct_prediction_count(pred, target)
         processed += len(data)
 
         # Update the progress bar
@@ -137,7 +142,7 @@ def test(model, device, test_loader, criterion):
     Function to test the model on the test dataset.
     """
 
-    # Test the model
+    # Initialize the model to evaluation mode
     model.eval()
 
     # Reset the loss and correct predictions for the epoch
@@ -158,7 +163,7 @@ def test(model, device, test_loader, criterion):
             ).item()  # Remove reduction and fix batch loss
 
             # Get the count of correct predictions
-            correct += GetCorrectPredCount(output, target)
+            correct += get_correct_prediction_count(output, target)
 
     # Calculate the final loss
     test_loss /= len(test_loader.dataset)
@@ -166,6 +171,7 @@ def test(model, device, test_loader, criterion):
     test_acc.append(100.0 * correct / len(test_loader.dataset))
     test_losses.append(test_loss)
 
+    # Print the final test loss and accuracy
     print(
         "Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n".format(
             test_loss,
