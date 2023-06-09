@@ -108,7 +108,8 @@ The backpropagation algorithm works by computing the gradient of the loss functi
 
 ### Learning Rate vs Errors
 
-Here is the impact of different learning rates on errors
+As Learning rate increases, the value of errors reduces very quickly. Here is the impact of different learning rates on errors in a visual manner:
+
 ![](<../Files/Error vs LR.png>)
 
 <br>
