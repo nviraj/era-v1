@@ -35,17 +35,16 @@
 
 - [**models.py**](model.py)
   - Contains a class called Net which defines our network and the forward function
+  - Contains lists to hold metrics to track accuracy and loss for both training and testing. These are used by training, testing and plotting related functions.
+  - Contains the following model train and test related functions:
+    - _train()_: Train the model on the train dataset.
+    - _test()_: Test the model on the test dataset.
+    - _plot_train_test_metrics()_: Plot the training and test metrics
 - [**utils.py**](utils.py)
   - Contains the following utility functions:
-    - **_Train and Test Related_**
-      - _get_device()_: Get the device to be used for training and testing
-      - _get_correct_prediction_count()_: Get the count of correct predictions given both predictions and labels
-      - _train()_: Train the model on the train dataset.
-      - _test()_: Test the model on the test dataset.
-    - **_Plotting related_**
-      - _plot_sample_training_images()_: Plot sample images from the training data to gain a better understanding of the data
-      - _plot_train_test_metrics()_: Plot the training and test metrics
-  - Contains lists to hold metrics to track accuracy and loss for both training and testing. These are used by training, testing and plotting related functions.
+    - _get_device()_: Get the device to be used for training and testing
+    - _get_correct_prediction_count()_: Get the count of correct predictions given both predictions and labels
+    - _plot_sample_training_images()_: Plot sample images from the training data to gain a better understanding of the data
 - [**S5.ipynb**](S5.ipynb)
   - Contains our end to end workflow to predict labels for MNIST dataset. This imports functions from utils and the network from models file.
   - The **flow** is as follows:
@@ -55,10 +54,10 @@
     - Define Transformations for the dataset using _apply_mnist_image_transformations()_
     - Download MNIST dataset and split into 2 and apply relevant Transformation definitions
     - Load both test and train data using DataLoader with options like batch size
-    - Plot sample input data
+    - Plot sample input data using _plot_sample_training_images()_
     - Instantiate model and send to device and check out summary
     - Train and test the model for every epoch so that gradients, learning rate and weights are updated to improve accuracy
-    - Plot the final test and train metrics
+    - Plot the final test and train metrics using _plot_train_test_metrics()_
 
 <br>
 
