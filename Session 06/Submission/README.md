@@ -19,17 +19,21 @@
     - [Accuracy](#accuracy)
 
 <br>
+<br>
+<br>
 
 ## Objectives
 
-- Part 1
+- **Part 1**
   - Understanding how backpropagation works by manually implementing it for a simple neural network in Excel
   - Understanding the interplay partial derivatives, gradients, learning rate and weights
   - Assessing impact on loss by changing learning rates
-- Part 2
+- **Part 2**
   - Building a performant neural network even when there are restrictions on the number of parameters and epochs
   - Practically using a number of concepts introduced in sessions till now and determining how they impact accuracy
 
+<br>
+<br>
 <br>
 
 ## Part 1
@@ -40,11 +44,15 @@ We demonstrate how the concept of back propagation is used to improve the neural
 
 The entire calculation can be seen in this [Excel file](BackPropagation.xlsx):
 
+<br>
+
 ### The Network
 
 The below simple neural network has been chosen in order to make the calculations easier.
 
 ![](<../Files/Simple Network.png>)
+
+<br>
 
 ### Terminologies
 
@@ -59,6 +67,8 @@ The network has:
 - a_h and a_o are the output of activation function on hidden layer and output layer respectively
 - t1 and t2 are the target values
 - E is the total loss which is a summation of E1 and E2 calculated by comparing indivdual outputs to target values
+
+<br>
 
 ### Calculation
 
@@ -88,15 +98,20 @@ The backpropagation algorithm works by computing the gradient of the loss functi
 
 ![](<../Files/BP Step 6.png>)
 
+<br>
+
 ### Final Calculation in Excel
 
 ![](<../Files/Calculation Overview.png>)
+
+<br>
 
 ### Learning Rate vs Errors
 
 Here is the impact of different learning rates on errors
 ![](<../Files/Error vs LR.png>)
 
+<br>
 <br>
 <br>
 
