@@ -130,7 +130,7 @@ The neural networks crafted involved experimenting with concepts such as 2D Conv
 
 After multiple iterations, the following network was created
 
-- Block 1: It consists of a series of operations applied to the input image.
+- **Block 1**: It consists of a series of operations applied to the input image.
   - Convolutional layer: Extracts features from the input image using 16 filters of size 3x3.
   - ReLU activation: Applies the rectified linear unit function, which introduces non-linearity.
   - Batch normalization: Normalizes the outputs of the previous layer to stabilize the learning process.
@@ -139,7 +139,7 @@ After multiple iterations, the following network was created
   - Padding: Adds a border of 1 pixel to the feature maps to preserve spatial dimensions.
   - ReLU activation and batch normalization.
   - Dropout: Randomly sets a fraction of inputs to 0 during training to prevent overfitting.
-- Block 2:
+- **Block 2**:
   - Convolutional layer: Uses 16 filters of size 3x3 to extract more features.
   - ReLU activation and batch normalization.
   - Another convolutional layer with the same configurations.
@@ -147,14 +147,13 @@ After multiple iterations, the following network was created
   - Padding, ReLU activation, and batch normalization.
   - Max pooling: Reduces the spatial dimensions of the feature maps by taking the maximum value in each 2x2 region.
   - Dropout.
-- Block 3:
+- **Block 3**:
   - Convolutional layer: Extracts features using 16 filters of size 3x3.
   - ReLU activation and batch normalization.
   - Another convolutional layer with the same configurations.
   - ReLU activation and batch normalization.
   - Padding, ReLU activation, and dropout.
-- Block 4:
-- This block performs the final operations to produce the classification output.
+- **Block 4**: - This block performs the final operations to produce the classification output.
   - Average pooling: Reduces the spatial dimensions to 1x1 by taking the average value in each 5x5 region.
   - Flattening: Reshapes the output into a 1-dimensional vector.
   - Linear layer: Maps the flattened features to the output classes (10 classes in this case).
