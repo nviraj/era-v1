@@ -59,19 +59,38 @@ The network has:
 - t1 and t2 are the target values
 - E is the total loss which is a summation of E1 and E2 calculated by comparing indivdual outputs to target values
 
-**Insert table of terminologies**
-
 ### Calculation
 
 The backpropagation algorithm works by computing the gradient of the loss function with respect to each weight via the chain rule, computing the gradient layer by layer, and iterating backward from the last layer to avoid redundant computation of intermediate terms in the chain rule.
 
-Show step by step calculation
+**Formulae for terminologies introduced above**
+
+![](<../Files/BP Step 1.png>)
+
+**Partial derivate of E w.r.t w5**
+
+![](<../Files/BP Step 2.png>)
+
+**Extending calculations w.r.t. w5 to w6, w7 and w8**
+
+![](<../Files/BP Step 3.png>)
+
+**Gradient calculation of E w.r.t a_h1 and a_h2 by chaining E1 and E2**
+
+![](<../Files/BP Step 4.png>)
+
+**Gradient calculation of E w.r.t w1, w2, w3, w4 by chaining a_h1 and a_h2**
+
+![](<../Files/BP Step 5.png>)
+
+**Final gradient calculation by combining everything**
+
+![](<../Files/BP Step 6.png>)
 
 ### Learning Rate vs Errors
 
 Here is the impact of different learning rates on errors
-
-Add different graphs
+![](<../Files/Error vs LR.png>)
 
 <br>
 <br>
