@@ -9,6 +9,7 @@
     - [The Network](#the-network)
     - [Terminologies](#terminologies)
     - [Calculation](#calculation)
+    - [Final Calculation in Excel](#final-calculation-in-excel)
     - [Learning Rate vs Errors](#learning-rate-vs-errors)
   - [Part 2](#part-2)
     - [Context](#context)
@@ -86,6 +87,10 @@ The backpropagation algorithm works by computing the gradient of the loss functi
 **Final gradient calculation by combining everything**
 
 ![](<../Files/BP Step 6.png>)
+
+### Final Calculation in Excel
+
+![](<../Files/Calculation Overview.png>)
 
 ### Learning Rate vs Errors
 
