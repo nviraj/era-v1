@@ -5,13 +5,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from utils import get_correct_prediction_count
 
-# Data to plot accuracy and loss graphs
-train_losses = []
-test_losses = []
-train_acc = []
-test_acc = []
-
-test_incorrect_pred = {"images": [], "ground_truths": [], "predicted_vals": []}
+# test_incorrect_pred = {"images": [], "ground_truths": [], "predicted_vals": []}
 
 
 # Define the neural network architecture
@@ -48,7 +42,9 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-def train(model, device, train_loader, optimizer, criterion):
+def train_model(
+    model, device, train_loader, optimizer, criterion, train_acc, train_losses
+):
     """
     Function to train the model on the train dataset.
     """
@@ -97,7 +93,7 @@ def train(model, device, train_loader, optimizer, criterion):
     train_losses.append(train_loss / len(train_loader))
 
 
-def test(model, device, test_loader, criterion):
+def test_model(model, device, test_loader, criterion, test_acc, test_losses):
     """
     Function to test the model on the test dataset.
     """
@@ -111,16 +107,14 @@ def test(model, device, test_loader, criterion):
 
     # Disable gradient calculation while testing
     with torch.no_grad():
-        for batch_idx, (data, target) in enumerate(test_loader):
+        for data, target in test_loader:
             # Move data and labels to device
             data, target = data.to(device), target.to(device)
 
             # Predict using model
             output = model(data)
             # Calculate loss for the batch
-            test_loss += criterion(
-                output, target
-            ).item()  # Remove reduction and fix batch loss
+            test_loss += criterion(output, target, reduction="sum").item()
 
             # Get the count of correct predictions
             correct += get_correct_prediction_count(output, target)
@@ -137,7 +131,7 @@ def test(model, device, test_loader, criterion):
     )
 
 
-def plot_train_test_metrics():
+def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
     """
     Function to plot the training and test metrics.
     """
