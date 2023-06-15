@@ -36,7 +36,7 @@ def get_device():
     return final_choice, torch.device(final_choice)
 
 
-def plot_sample_training_images(batch_data, batch_label):
+def plot_sample_training_images(batch_data, num_images=25):
     """
     Function to plot sample images from the training data.
     """
@@ -44,12 +44,15 @@ def plot_sample_training_images(batch_data, batch_label):
     # Initialize the grid of images and labels
     fig = plt.figure()
 
+    num_images = min(num_images, len(batch_data))
+
     # Display 12 images from the training data
-    for i in range(12):
-        plt.subplot(3, 4, i + 1)
-        plt.tight_layout()
-        plt.imshow(batch_data[i].squeeze(0), cmap="gray")
-        plt.title(batch_label[i].item())
+    for i in range(0, num_images):
+        plt.subplot(int(round(num_images / 5, 0)), 5, i + 1)
+        # plt.tight_layout()
+        plt.axis("off")
+        plt.imshow(batch_data[i].squeeze(), cmap="gray_r")
+        # plt.title(batch_label[i].item())
         plt.xticks([])
         plt.yticks([])
 
