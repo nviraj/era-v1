@@ -2,10 +2,116 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 from utils import get_correct_prediction_count
 
 # test_incorrect_pred = {"images": [], "ground_truths": [], "predicted_vals": []}
+
+
+def train_model(model, device, train_loader, optimizer, train_acc, train_losses):
+    """
+    Function to train the model on the train dataset.
+    """
+
+    # Initialize the model to train mode
+    model.train()
+    # Initialize progress bar
+    pbar = tqdm(train_loader)
+
+    # Reset the loss and correct predictions for the epoch
+    train_loss = 0
+    correct = 0
+    processed = 0
+
+    # Iterate over the train loader
+    for batch_idx, (data, target) in enumerate(pbar):
+        # Move data and labels to device
+        data, target = data.to(device), target.to(device)
+        # Clear the gradients for the optimizer to avoid accumulation
+        optimizer.zero_grad()
+
+        # Predict
+        pred = model(data)
+
+        # Calculate loss for the batch
+        loss = F.nll_loss(pred, target)
+        # Update the loss
+        train_loss += loss.item()
+
+        # Backpropagation to calculate the gradients
+        loss.backward()
+        # Update the weights
+        optimizer.step()
+
+        # Get the count of correct predictions
+        correct += get_correct_prediction_count(pred, target)
+        processed += len(data)
+
+        # Update the progress bar
+        pbar.set_description(
+            desc=f"Train: Loss={loss.item():0.4f}, Batch_id={batch_idx}, Accuracy={100*correct/processed:0.2f}"
+        )
+
+    # Append the final loss and accuracy for the epoch
+    train_acc.append(100 * correct / processed)
+    train_losses.append(train_loss / len(train_loader))
+
+
+def test_model(model, device, test_loader, test_acc, test_losses):
+    """
+    Function to test the model on the test dataset.
+    """
+
+    # Initialize the model to evaluation mode
+    model.eval()
+
+    # Reset the loss and correct predictions for the epoch
+    test_loss = 0
+    correct = 0
+
+    # Disable gradient calculation while testing
+    with torch.no_grad():
+        for data, target in test_loader:
+            # Move data and labels to device
+            data, target = data.to(device), target.to(device)
+
+            # Predict using model
+            output = model(data)
+            # Calculate loss for the batch
+            test_loss += F.nll_loss(output, target, reduction="sum").item()
+
+            # Get the count of correct predictions
+            correct += get_correct_prediction_count(output, target)
+
+    # Calculate the final loss
+    test_loss /= len(test_loader.dataset)
+    # Append the final loss and accuracy for the epoch
+    test_acc.append(100.0 * correct / len(test_loader.dataset))
+    test_losses.append(test_loss)
+
+    # Print the final test loss and accuracy
+    print(
+        f"Test set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100.0 * correct / len(test_loader.dataset):.2f}%)"
+    )
+
+
+def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
+    """
+    Function to plot the training and test metrics.
+    """
+
+    # Plot the graphs in a 2x2 grid showing the training and test metrics
+    fig, axs = plt.subplots(2, 2, figsize=(15, 10))
+    axs[0, 0].plot(train_losses)
+    axs[0, 0].set_title("Training Loss")
+    axs[1, 0].plot(train_acc)
+    axs[1, 0].set_title("Training Accuracy")
+    axs[0, 1].plot(test_losses)
+    axs[0, 1].set_title("Test Loss")
+    axs[1, 1].plot(test_acc)
+    axs[1, 1].set_title("Test Accuracy")
+
+    return fig, axs
 
 
 # Define the neural network architecture
@@ -40,111 +146,3 @@ class Net(nn.Module):
         # print(x.shape)
 
         return F.log_softmax(x, dim=1)
-
-
-def train_model(
-    model, device, train_loader, optimizer, criterion, train_acc, train_losses
-):
-    """
-    Function to train the model on the train dataset.
-    """
-
-    # Initialize the model to train mode
-    model.train()
-    # Initialize progress bar
-    pbar = tqdm(train_loader)
-
-    # Reset the loss and correct predictions for the epoch
-    train_loss = 0
-    correct = 0
-    processed = 0
-
-    # Iterate over the train loader
-    for batch_idx, (data, target) in enumerate(pbar):
-        # Move data and labels to device
-        data, target = data.to(device), target.to(device)
-        # Clear the gradients for the optimizer to avoid accumulation
-        optimizer.zero_grad()
-
-        # Predict
-        pred = model(data)
-
-        # Calculate loss for the batch
-        loss = criterion(pred, target)
-        # Update the loss
-        train_loss += loss.item()
-
-        # Backpropagation to calculate the gradients
-        loss.backward()
-        # Update the weights
-        optimizer.step()
-
-        # Get the count of correct predictions
-        correct += get_correct_prediction_count(pred, target)
-        processed += len(data)
-
-        # Update the progress bar
-        pbar.set_description(
-            desc=f"Train: Loss={loss.item():0.4f} Batch_id={batch_idx} Accuracy={100*correct/processed:0.2f}"
-        )
-
-    # Append the final loss and accuracy for the epoch
-    train_acc.append(100 * correct / processed)
-    train_losses.append(train_loss / len(train_loader))
-
-
-def test_model(model, device, test_loader, criterion, test_acc, test_losses):
-    """
-    Function to test the model on the test dataset.
-    """
-
-    # Initialize the model to evaluation mode
-    model.eval()
-
-    # Reset the loss and correct predictions for the epoch
-    test_loss = 0
-    correct = 0
-
-    # Disable gradient calculation while testing
-    with torch.no_grad():
-        for data, target in test_loader:
-            # Move data and labels to device
-            data, target = data.to(device), target.to(device)
-
-            # Predict using model
-            output = model(data)
-            # Calculate loss for the batch
-            test_loss += criterion(output, target, reduction="sum").item()
-
-            # Get the count of correct predictions
-            correct += get_correct_prediction_count(output, target)
-
-    # Calculate the final loss
-    test_loss /= len(test_loader.dataset)
-    # Append the final loss and accuracy for the epoch
-    test_acc.append(100.0 * correct / len(test_loader.dataset))
-    test_losses.append(test_loss)
-
-    # Print the final test loss and accuracy
-    print(
-        f"Test set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100.0 * correct / len(test_loader.dataset):.2f}%)"
-    )
-
-
-def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
-    """
-    Function to plot the training and test metrics.
-    """
-
-    # Plot the graphs in a 2x2 grid showing the training and test metrics
-    fig, axs = plt.subplots(2, 2, figsize=(15, 10))
-    axs[0, 0].plot(train_losses)
-    axs[0, 0].set_title("Training Loss")
-    axs[1, 0].plot(train_acc)
-    axs[1, 0].set_title("Training Accuracy")
-    axs[0, 1].plot(test_losses)
-    axs[0, 1].set_title("Test Loss")
-    axs[1, 1].plot(test_acc)
-    axs[1, 1].set_title("Test Accuracy")
-
-    return fig, axs
