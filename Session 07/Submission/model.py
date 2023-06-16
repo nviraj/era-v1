@@ -115,10 +115,11 @@ def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
 
 
 # Define the neural network architecture
-class Net(nn.Module):
+# This is for Model 00
+class Model_00(nn.Module):
     # This defines the structure of the NN.
     def __init__(self):
-        super(Net, self).__init__()
+        super(Model_00, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3)
         self.conv3 = nn.Conv2d(64, 128, kernel_size=3)
