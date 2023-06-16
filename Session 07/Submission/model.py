@@ -172,8 +172,9 @@ class Model01(nn.Module):
         self.block1 = nn.Sequential(
             nn.Conv2d(
                 in_channels=1,
-                out_channels=8,
-                kernel_size=(3, 3),
+                out_channels=16,
+                kernel_size=3,
+                stride=1,
                 padding=0,
                 bias=False,
             ),
@@ -183,17 +184,19 @@ class Model01(nn.Module):
         # Block 2
         self.block2 = nn.Sequential(
             nn.Conv2d(
-                in_channels=8,
-                out_channels=16,
-                kernel_size=(3, 3),
+                in_channels=16,
+                out_channels=32,
+                kernel_size=3,
+                stride=1,
                 padding=0,
                 bias=False,
             ),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=16,
-                out_channels=16,
-                kernel_size=(3, 3),
+                in_channels=32,
+                out_channels=32,
+                kernel_size=3,
+                stride=1,
                 padding=0,
                 bias=False,
             ),
@@ -203,17 +206,19 @@ class Model01(nn.Module):
         # Block 3
         self.block3 = nn.Sequential(
             nn.Conv2d(
-                in_channels=16,
-                out_channels=32,
-                kernel_size=(3, 3),
+                in_channels=32,
+                out_channels=64,
+                kernel_size=3,
+                stride=1,
                 padding=0,
                 bias=False,
             ),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=32,
-                out_channels=32,
-                kernel_size=(3, 3),
+                in_channels=64,
+                out_channels=64,
+                kernel_size=3,
+                stride=1,
                 padding=0,
                 bias=False,
             ),
@@ -223,28 +228,26 @@ class Model01(nn.Module):
         # Block 4
         self.block4 = nn.Sequential(
             nn.Conv2d(
-                in_channels=32,
+                in_channels=64,
                 out_channels=10,
-                kernel_size=(1, 1),
+                kernel_size=3,
+                stride=1,
                 padding=0,
                 bias=False,
             ),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=10,
-                out_channels=10,
-                kernel_size=(7, 7),
-                padding=0,
-                bias=False,
-            )
-            # nn.ReLU() NEVER!
+            nn.AdaptiveAvgPool2d(1),
         )
 
     def forward(self, x):
         """Forward pass"""
         x = self.block1(x)
+        # print(x.shape)
         x = self.block2(x)
+        # print(x.shape)
         x = self.block3(x)
+        # print(x.shape)
         x = self.block4(x)
-        x = x.view(-1, 10)
+        # print(x.shape)
+        x = x.view((x.shape[0], -1))
+        # print(x.shape)
         return F.log_softmax(x, dim=-1)
