@@ -683,7 +683,7 @@ class Model05(nn.Module):
         # Convolution Layer -> ReLU -> Batch Normalization -> Max Pooling -> Dropout
 
         #  Model Notes
-        # Same as model 4
+        # Same as model 4, dropout reduced to 0.05
         # Added rotation of 6 degrees to the transforms
 
         # Block 1 - Input Block
@@ -727,7 +727,7 @@ class Model05(nn.Module):
             ),
             nn.ReLU(),
             nn.BatchNorm2d(10),
-            nn.Dropout(0.10),
+            nn.Dropout(0.05),
             nn.Conv2d(
                 in_channels=10,
                 out_channels=12,
@@ -739,7 +739,7 @@ class Model05(nn.Module):
             nn.ReLU(),
             nn.BatchNorm2d(12),
             # nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Dropout(0.10),
+            nn.Dropout(0.05),
         )
 
         # Block 4 - Don't use Max Pooling here
@@ -754,7 +754,7 @@ class Model05(nn.Module):
             ),
             nn.ReLU(),
             nn.BatchNorm2d(14),
-            nn.Dropout(0.10),
+            nn.Dropout(0.05),
             nn.Conv2d(
                 in_channels=14,
                 out_channels=16,
