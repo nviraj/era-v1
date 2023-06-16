@@ -257,6 +257,9 @@ class Model01(nn.Module):
 class Model02(nn.Module):
     """This defines the structure of the NN."""
 
+    # Class variable to print shape
+    print_shape = False
+
     def __init__(self):
         super(Model02, self).__init__()
 
@@ -275,10 +278,10 @@ class Model02(nn.Module):
         self.block1 = nn.Sequential(
             nn.Conv2d(
                 in_channels=1,
-                out_channels=10,
+                out_channels=8,
                 kernel_size=3,
                 stride=1,
-                padding=1,
+                padding=0,
                 bias=False,
             ),
             nn.ReLU(),
@@ -287,8 +290,8 @@ class Model02(nn.Module):
         # Block 2
         self.block2 = nn.Sequential(
             nn.Conv2d(
-                in_channels=10,
-                out_channels=12,
+                in_channels=8,
+                out_channels=10,
                 kernel_size=3,
                 stride=1,
                 padding=0,
@@ -301,7 +304,7 @@ class Model02(nn.Module):
         # Block 3
         self.block3 = nn.Sequential(
             nn.Conv2d(
-                in_channels=12,
+                in_channels=10,
                 out_channels=12,
                 kernel_size=3,
                 stride=1,
@@ -318,7 +321,7 @@ class Model02(nn.Module):
                 bias=False,
             ),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            # nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
         # Block 4 - Don't use Max Pooling here
@@ -359,15 +362,15 @@ class Model02(nn.Module):
     def forward(self, x):
         """Forward pass"""
         x = self.block1(x)
-        # print(x.shape)
+        print(x.shape) if self.print_shape else None
         x = self.block2(x)
-        # print(x.shape)
+        print(x.shape) if self.print_shape else None
         x = self.block3(x)
-        # print(x.shape)
+        print(x.shape) if self.print_shape else None
         x = self.block4(x)
-        # print(x.shape)
+        print(x.shape) if self.print_shape else None
         x = self.block5(x)
-        # print(x.shape)
+        print(x.shape) if self.print_shape else None
         x = x.view((x.shape[0], -1))
-        # print(x.shape)
+        print(x.shape) if self.print_shape else None
         return F.log_softmax(x, dim=-1)
