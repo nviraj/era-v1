@@ -543,7 +543,7 @@ class Model04(nn.Module):
         # Convolution Layer -> ReLU -> Batch Normalization -> Max Pooling -> Dropout
 
         #  Model Notes
-        # Added dropouts (Skipped input layer, output layer + penultimate layer and layers with Max Pooling)
+        # Added dropouts of 0.1 (Skipped input layer, output layer + penultimate layer and layers with Max Pooling)
 
         # Block 1 - Input Block
         self.block1 = nn.Sequential(
@@ -614,6 +614,147 @@ class Model04(nn.Module):
             nn.ReLU(),
             nn.BatchNorm2d(14),
             nn.Dropout(0.1),
+            nn.Conv2d(
+                in_channels=14,
+                out_channels=16,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(16),
+        )
+
+        # Block 5 - Output Block
+        self.block5 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=16,
+                out_channels=10,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.AdaptiveAvgPool2d(1),
+        )
+
+    def print_view(self, x):
+        """Print shape of the model"""
+        if self.print_shape:
+            print(x.shape)
+
+    def forward(self, x):
+        """Forward pass"""
+        x = self.block1(x)
+        self.print_view(x)
+        x = self.block2(x)
+        self.print_view(x)
+        x = self.block3(x)
+        self.print_view(x)
+        x = self.block4(x)
+        self.print_view(x)
+        x = self.block5(x)
+        self.print_view(x)
+        x = x.view((x.shape[0], -1))
+        self.print_view(x)
+        return F.log_softmax(x, dim=-1)
+
+
+# This is for Model 05
+class Model05(nn.Module):
+    """This defines the structure of the NN."""
+
+    # Class variable to print shape
+    print_shape = False
+
+    def __init__(self):
+        super().__init__()
+
+        # General Notes
+
+        # ReLU used after every Convolution layer
+        # Batch Normalization used after every Convolution layer
+        # Dropout used after every block/ layer
+        # Max Pooling preferably used after every block
+        # GAP used at the end of the model
+
+        # Sequence in a block could be as follows
+        # Convolution Layer -> ReLU -> Batch Normalization -> Max Pooling -> Dropout
+
+        #  Model Notes
+        # Same as model 4 but increased dropout to 0.15
+        # Added rotation of 6 degrees to the transforms
+
+        # Block 1 - Input Block
+        self.block1 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=1,
+                out_channels=8,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(8),
+        )
+
+        # Block 2
+        self.block2 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=8,
+                out_channels=10,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(10),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        # Block 3
+        self.block3 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=10,
+                out_channels=10,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(10),
+            nn.Dropout(0.15),
+            nn.Conv2d(
+                in_channels=10,
+                out_channels=12,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(12),
+            # nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.15),
+        )
+
+        # Block 4 - Don't use Max Pooling here
+        self.block4 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=12,
+                out_channels=14,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(14),
+            nn.Dropout(0.15),
             nn.Conv2d(
                 in_channels=14,
                 out_channels=16,
