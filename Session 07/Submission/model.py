@@ -251,3 +251,123 @@ class Model01(nn.Module):
         x = x.view((x.shape[0], -1))
         # print(x.shape)
         return F.log_softmax(x, dim=-1)
+
+
+# This is for Model 02
+class Model02(nn.Module):
+    """This defines the structure of the NN."""
+
+    def __init__(self):
+        super(Model02, self).__init__()
+
+        # General Notes
+
+        # ReLU used after every Convolution layer
+        # Batch Normalization used after every Convolution layer
+        # Dropout used after every block/ layer
+        # Max Pooling preferably used after every block
+        # GAP used at the end of the model
+
+        # Sequence in a block could be as follows
+        # Convolution Layer -> ReLU -> Batch Normalization -> Max Pooling -> Dropout
+
+        # Block 1 - Input Block
+        self.block1 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=1,
+                out_channels=10,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+                bias=False,
+            ),
+            nn.ReLU(),
+        )
+
+        # Block 2
+        self.block2 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=10,
+                out_channels=12,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        # Block 3
+        self.block3 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=12,
+                out_channels=12,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=12,
+                out_channels=12,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        # Block 4 - Don't use Max Pooling here
+        self.block4 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=12,
+                out_channels=14,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=14,
+                out_channels=16,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+        )
+
+        # Block 5 - Output Block
+        self.block5 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=16,
+                out_channels=10,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.AdaptiveAvgPool2d(1),
+        )
+
+    def forward(self, x):
+        """Forward pass"""
+        x = self.block1(x)
+        # print(x.shape)
+        x = self.block2(x)
+        # print(x.shape)
+        x = self.block3(x)
+        # print(x.shape)
+        x = self.block4(x)
+        # print(x.shape)
+        x = self.block5(x)
+        # print(x.shape)
+        x = x.view((x.shape[0], -1))
+        # print(x.shape)
+        return F.log_softmax(x, dim=-1)
