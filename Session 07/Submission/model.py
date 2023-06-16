@@ -448,7 +448,7 @@ class Model03(nn.Module):
                 bias=False,
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(12),
+            nn.BatchNorm2d(10),
             nn.Conv2d(
                 in_channels=10,
                 out_channels=12,
