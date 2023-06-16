@@ -274,6 +274,11 @@ class Model02(nn.Module):
         # Sequence in a block could be as follows
         # Convolution Layer -> ReLU -> Batch Normalization -> Max Pooling -> Dropout
 
+        # Model notes
+        # Reduced channels in each block compared to Model 01
+        # Added max pooling after block 2
+        # Added print_shape variable to toggle printing shape of the model
+
         # Block 1 - Input Block
         self.block1 = nn.Sequential(
             nn.Conv2d(
@@ -373,4 +378,144 @@ class Model02(nn.Module):
         print(x.shape) if self.print_shape else None
         x = x.view((x.shape[0], -1))
         print(x.shape) if self.print_shape else None
+        return F.log_softmax(x, dim=-1)
+
+
+# This is for Model 03
+class Model03(nn.Module):
+    """This defines the structure of the NN."""
+
+    # Class variable to print shape
+    print_shape = False
+
+    def __init__(self):
+        super(Model03, self).__init__()
+
+        # General Notes
+
+        # ReLU used after every Convolution layer
+        # Batch Normalization used after every Convolution layer
+        # Dropout used after every block/ layer
+        # Max Pooling preferably used after every block
+        # GAP used at the end of the model
+
+        # Sequence in a block could be as follows
+        # Convolution Layer -> ReLU -> Batch Normalization -> Max Pooling -> Dropout
+
+        #  Model Notes
+        # Added padding in 1st block
+        # Added batch normalization after every convolution layer
+        # Reduced out channels slightly in block 3 to reduce parameters to below 8k
+        # Added print_view function to print shape of the model
+
+        # Block 1 - Input Block
+        self.block1 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=1,
+                out_channels=8,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(8),
+        )
+
+        # Block 2
+        self.block2 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=8,
+                out_channels=10,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(10),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        # Block 3
+        self.block3 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=10,
+                out_channels=10,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(12),
+            nn.Conv2d(
+                in_channels=10,
+                out_channels=12,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(12),
+            # nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        # Block 4 - Don't use Max Pooling here
+        self.block4 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=12,
+                out_channels=14,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(14),
+            nn.Conv2d(
+                in_channels=14,
+                out_channels=16,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(16),
+        )
+
+        # Block 5 - Output Block
+        self.block5 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=16,
+                out_channels=10,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.AdaptiveAvgPool2d(1),
+        )
+
+    def print_view(self, x):
+        """Print shape of the model"""
+        if self.print_shape:
+            print(x.shape)
+
+    def forward(self, x):
+        """Forward pass"""
+        x = self.block1(x)
+        print_view(x)
+        x = self.block2(x)
+        print_view(x)
+        x = self.block3(x)
+        print_view(x)
+        x = self.block4(x)
+        print_view(x)
+        x = self.block5(x)
+        print_view(x)
+        x = x.view((x.shape[0], -1))
+        print_view(x)
         return F.log_softmax(x, dim=-1)
