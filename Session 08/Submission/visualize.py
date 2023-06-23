@@ -68,7 +68,7 @@ def plot_misclassified_images(data, class_label, num_images=10):
     # Calculate the number of images to plot
     num_images = min(num_images, len(data["ground_truths"]))
     # calculate the number of rows and columns to plot
-    num_cols = 2
+    num_cols = 5
     num_rows = int(np.ceil(num_images / num_cols))
 
     # Initialize a subplot with the required number of rows and columns
