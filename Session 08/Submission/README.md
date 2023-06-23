@@ -673,9 +673,15 @@ Test set: Average loss: 0.6970, Accuracy: 7587/10000 (75.87%)
 
 ### Batch Normalization
 
+![](<../Files/Normalization - Batch - Metrics.png>)
+
 ### Group Normalization
 
+![](<../Files/Normalization - Group - Metrics.png>)
+
 ### Layer Normalization
+
+![](<../Files/Normalization - Layer - Metrics.png>)
 
 <br>
 
@@ -683,9 +689,15 @@ Test set: Average loss: 0.6970, Accuracy: 7587/10000 (75.87%)
 
 ### Batch Normalization
 
+![](<../Files/Normalization - Batch - Misclassified.png>)
+
 ### Group Normalization
 
+![](<../Files/Normalization - Group - Misclassified.png>)
+
 ### Layer Normalization
+
+![](<../Files/Normalization - Layer - Misclassified.png>)
 
 <br>
 
