@@ -5,7 +5,9 @@ from tqdm import tqdm
 from utils import get_correct_prediction_count
 
 
-def train_model(model, device, train_loader, optimizer, train_acc, train_losses):
+def train_model(
+    model, device, train_loader, optimizer, criterion, train_acc, train_losses
+):
     """
     Function to train the model on the train dataset.
     """
@@ -31,7 +33,7 @@ def train_model(model, device, train_loader, optimizer, train_acc, train_losses)
         pred = model(data)
 
         # Calculate loss for the batch
-        loss = F.nll_loss(pred, target)
+        loss = criterion(pred, target)
         # Update the loss
         train_loss += loss.item()
 
@@ -54,7 +56,7 @@ def train_model(model, device, train_loader, optimizer, train_acc, train_losses)
     train_losses.append(train_loss / len(train_loader))
 
 
-def test_model(model, device, test_loader, test_acc, test_losses):
+def test_model(model, device, test_loader, criterion, test_acc, test_losses):
     """
     Function to test the model on the test dataset.
     """
@@ -75,7 +77,7 @@ def test_model(model, device, test_loader, test_acc, test_losses):
             # Predict using model
             output = model(data)
             # Calculate loss for the batch
-            test_loss += F.nll_loss(output, target, reduction="sum").item()
+            test_loss += criterion(output, target, reduction="sum").item()
 
             # Get the count of correct predictions
             correct += get_correct_prediction_count(output, target)
