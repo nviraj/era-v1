@@ -63,30 +63,53 @@ def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
     return fig, axs
 
 
+# def plot_misclassified_images(data, class_label, num_images=10):
+#     """Plot the misclassified images from the test dataset."""
+
+#     for i in range(num_images):
+#         row_idx = i // num_cols
+#         col_idx = i % num_cols
+
+#         img = data["images"][i].cpu().numpy()
+#         img = np.transpose(img, (1, 2, 0))
+#         img = convert_back_image(img)
+#         )  # Normalize the image data
+#         label = data["ground_truths"][i].cpu().item()
+#         pred = data["predicted_vals"][i].cpu().item()
+
+#         axs[row_idx, col_idx].imshow(img)
+#         axs[row_idx, col_idx].set_title(
+#             f"Actual: {class_label[label]}, Predicted: {class_label[pred]}"
+#         )
+#         axs[row_idx, col_idx].axis("off")
+
+#     plt.tight_layout()
+#     return fig, axs
+
+
 def plot_misclassified_images(data, class_label, num_images=10):
     """Plot the misclassified images from the test dataset."""
-    num_rows = 5
-    # Adjust the number of columns based on the number of images
-    num_cols = (num_images + 1) // num_rows
+    # Calculate the number of images to plot
+    num_images = min(num_images, len(data))
+    # calculate the number of rows and columns to plot
+    num_cols = 2
+    num_rows = int(np.ceil(num_images / num_cols))
 
+    # Initialize a subplot with the required number of rows and columns
     fig, axs = plt.subplots(num_rows, num_cols, figsize=(num_cols * 2, num_rows * 2))
 
-    for i in range(num_images):
-        row_idx = i // num_cols
-        col_idx = i % num_cols
+    # Iterate through the images and plot them in the grid along with class labels
 
-        img = data["images"][i].cpu().numpy()
-        img = np.transpose(img, (1, 2, 0))
-        img = convert_back_image(img)
-        )  # Normalize the image data
-        label = data["ground_truths"][i].cpu().item()
-        pred = data["predicted_vals"][i].cpu().item()
+    for img_index in range(1, num_images + 1):
+        label = data["ground_truths"][img_index - 1].cpu().item()
+        pred = data["predicted_vals"][img_index - 1].cpu().item()
+        image = data["images"][img_index - 1].cpu().numpy()
+        plt.subplot(num_rows, num_cols, img_index)
+        plt.tight_layout()
+        plt.axis("off")
+        plt.imshow(convert_back_image(image))
+        plt.title(f"Actual: {class_label[label]}, Predicted: {class_label[pred]}")
+        plt.xticks([])
+        plt.yticks([])
 
-        axs[row_idx, col_idx].imshow(img)
-        axs[row_idx, col_idx].set_title(
-            f"Actual: {class_label[label]}, Predicted: {class_label[pred]}"
-        )
-        axs[row_idx, col_idx].axis("off")
-
-    plt.tight_layout()
     return fig, axs
