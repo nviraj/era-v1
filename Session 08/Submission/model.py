@@ -98,14 +98,35 @@ class BNModel(nn.Module):
 
     # Class variable to print shape
     print_shape = False
+    # Default dropout value
+    dropout_value = 0.025
 
-    def __init__(self):
+    def __init__(self, normalization_method="batch", num_groups=2):
         super().__init__()
+
+        self.norm = normalization_method
+        self.num_group = num_groups
+
+        # Throw an error if normalization method does not match list of acceptable values
+        allowed_norm = ["batch", "layer", "group"]
+        if self.norm not in allowed_norm:
+            raise ValueError(f"Normalization method must be one of {allowed_norm}")
+
+        # if layer normalisation is chosen change num_groups to 1
+        if self.norm == "layer":
+            self.num_group = 1
+
+        # if group normalisation is chosen throw an error if num_groups is less than 2
+        if self.norm == "group":
+            if self.num_group < 2:
+                raise ValueError(
+                    f"Number of groups must be greater than 1 for group normalization"
+                )
 
         # General Notes
 
         # ReLU used after every Convolution layer
-        # Batch Normalization used after every Convolution layer
+        # Normalization used after every Convolution layer
         # Dropout used after every block/ layer
         # Max Pooling preferably used after every block
         # GAP used at the end of the model
@@ -115,99 +136,117 @@ class BNModel(nn.Module):
 
         #  Model Notes
 
-        # Block 1 - Input Block
-        self.block1 = nn.Sequential(
-            nn.Conv2d(
-                in_channels=1,
-                out_channels=8,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                bias=False,
-            ),
+        self.C1 = nn.Sequential(
+            nn.Conv2d(3, 12, kernel_size=3, stride=1, padding=1, bias=False),
             nn.ReLU(),
-            nn.BatchNorm2d(8),
+            nn.Dropout(self.dropout_value),
+            # nn.BatchNorm2d(12)
+            # if self.norm == "batch"
+            # else nn.GroupNorm(self.num_group, 12),
         )
 
-        # Block 2
-        self.block2 = nn.Sequential(
-            nn.Conv2d(
-                in_channels=8,
-                out_channels=10,
-                kernel_size=3,
-                stride=1,
-                padding=0,
-                bias=False,
-            ),
+        if self.norm == "batch":
+            self.n1 = nn.BatchNorm2d(12)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n1 = nn.GroupNorm(self.num_group, 12)
+
+        self.C2 = nn.Sequential(
+            nn.Conv2d(12, 16, kernel_size=3, stride=1, padding=1, bias=False),
             nn.ReLU(),
-            nn.BatchNorm2d(10),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(self.dropout_value),
         )
 
-        # Block 3
-        self.block3 = nn.Sequential(
-            nn.Conv2d(
-                in_channels=10,
-                out_channels=10,
-                kernel_size=3,
-                stride=1,
-                padding=0,
-                bias=False,
-            ),
+        if self.norm == "batch":
+            self.n2 = nn.BatchNorm2d(16)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n2 = nn.GroupNorm(self.num_group, 16)
+
+        self.c3 = nn.Sequential(
+            nn.Conv2d(16, 16, kernel_size=1, stride=1, bias=False),
             nn.ReLU(),
-            nn.BatchNorm2d(10),
-            nn.Dropout(0.01),
-            nn.Conv2d(
-                in_channels=10,
-                out_channels=12,
-                kernel_size=3,
-                stride=1,
-                padding=0,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.BatchNorm2d(12),
-            # nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Dropout(0.01),
+            nn.Dropout(self.dropout_value),
         )
 
-        # Block 4 - Don't use Max Pooling here
-        self.block4 = nn.Sequential(
-            nn.Conv2d(
-                in_channels=12,
-                out_channels=14,
-                kernel_size=3,
-                stride=1,
-                padding=0,
-                bias=False,
-            ),
+        if self.norm == "batch":
+            self.n3t = nn.BatchNorm2d(8)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n3t = nn.GroupNorm(self.num_group, 16)
+
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.C3 = nn.Sequential(
+            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
             nn.ReLU(),
-            nn.BatchNorm2d(14),
-            nn.Dropout(0.01),
-            nn.Conv2d(
-                in_channels=14,
-                out_channels=16,
-                kernel_size=3,
-                stride=1,
-                padding=0,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.BatchNorm2d(16),
+            nn.Dropout(self.dropout_value),
         )
 
-        # Block 5 - Output Block
-        self.block5 = nn.Sequential(
-            nn.Conv2d(
-                in_channels=16,
-                out_channels=10,
-                kernel_size=3,
-                stride=1,
-                padding=0,
-                bias=False,
-            ),
-            nn.AdaptiveAvgPool2d(1),
+        if self.norm == "batch":
+            self.n3 = nn.BatchNorm2d(16)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n3 = nn.GroupNorm(self.num_group, 16)
+
+        self.C4 = nn.Sequential(
+            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.ReLU(),
+            nn.Dropout(self.dropout_value),
         )
+
+        if self.norm == "batch":
+            self.n4 = nn.BatchNorm2d(16)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n4 = nn.GroupNorm(self.num_group, 16)
+
+        self.C5 = nn.Sequential(
+            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.ReLU(),
+            nn.Dropout(self.dropout_value),
+        )
+
+        if self.norm == "batch":
+            self.n5 = nn.BatchNorm2d(16)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n5 = nn.GroupNorm(self.num_group, 16)
+
+        self.c6 = nn.Sequential(
+            nn.Conv2d(16, 16, kernel_size=1, stride=1, bias=False),
+            nn.ReLU(),
+            nn.Dropout(self.dropout_value),
+        )
+
+        if self.norm == "batch":
+            self.n6t = nn.BatchNorm2d(16)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n6t = nn.GroupNorm(self.num_group, 16)
+
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.C7 = nn.Sequential(
+            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.ReLU(),
+            nn.Dropout(self.dropout_value),
+        )
+
+        if self.norm == "batch":
+            self.n6 = nn.BatchNorm2d(16)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n6 = nn.GroupNorm(self.num_group, 16)
+
+        self.C8 = nn.Sequential(
+            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.ReLU(),
+            nn.Dropout(self.dropout_value),
+        )
+
+        if self.norm == "batch":
+            self.n7 = nn.BatchNorm2d(16)
+        elif self.norm == "group" or self.norm == "layer":
+            self.n7 = nn.GroupNorm(self.num_group, 16)
+
+        self.C9 = nn.Sequential(
+            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False)
+        )
+        self.gap = nn.Sequential(nn.AdaptiveAvgPool2d(1))
+        self.c10 = nn.Sequential(nn.Conv2d(16, 10, kernel_size=1, stride=1, bias=False))
 
     def print_view(self, x):
         """Print shape of the model"""
@@ -216,16 +255,20 @@ class BNModel(nn.Module):
 
     def forward(self, x):
         """Forward pass"""
-        x = self.block1(x)
-        self.print_view(x)
-        x = self.block2(x)
-        self.print_view(x)
-        x = self.block3(x)
-        self.print_view(x)
-        x = self.block4(x)
-        self.print_view(x)
-        x = self.block5(x)
-        self.print_view(x)
+
+        x = self.n1(self.C1(x))
+        x = self.n2(self.C2(x))
+        x = self.pool1(self.n3t(self.c3(x)))
+        x = self.n3(self.C3(x))
+        x = self.n4(self.C4(x))
+        x = self.n5(self.C5(x))
+        x = self.n6t(self.pool2(self.c6(x)))
+        x = self.n6(self.C7(x))
+        x = self.n7(self.C8(x))
+        x = self.C9(x)
+        x = self.gap(x)
+        x = self.c10(x)
         x = x.view((x.shape[0], -1))
-        self.print_view(x)
-        return F.log_softmax(x, dim=-1)
+        x = F.log_softmax(x, dim=1)
+
+        return x
