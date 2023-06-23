@@ -96,14 +96,14 @@ def plot_misclassified_images(data, class_label, num_images=10):
     num_rows = int(np.ceil(num_images / num_cols))
 
     # Initialize a subplot with the required number of rows and columns
-    fig, axs = plt.subplots(num_rows, num_cols, figsize=(num_cols * 2, num_rows * 2))
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(num_cols * 4, num_rows * 4))
 
     # Iterate through the images and plot them in the grid along with class labels
 
     for img_index in range(1, num_images + 1):
         label = data["ground_truths"][img_index - 1].cpu().item()
         pred = data["predicted_vals"][img_index - 1].cpu().item()
-        image = data["images"][img_index - 1].cpu().numpy()
+        image = data["images"][img_index - 1].cpu()
         plt.subplot(num_rows, num_cols, img_index)
         plt.tight_layout()
         plt.axis("off")
