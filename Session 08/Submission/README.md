@@ -11,7 +11,6 @@
   - [Model](#model)
     - [Architecture/ Code](#architecture-code)
     - [Parameters](#parameters)
-    - [Receptive Field](#receptive-field)
   - [Training logs](#training-logs)
     - [Batch Normalization](#batch-normalization)
     - [Group Normalization](#group-normalization)
@@ -56,7 +55,10 @@ Build a CIFAR10 image classification networks which adheres to the following gui
 
 The CIFAR10 dataset is a collection of 60,000 32x32 color images, divided into 50,000 training images and 10,000 test images. The dataset contains 10 classes, each with 6,000 images: airplane, automobile, bird, cat, deer, dog, frog, horse, ship, and truck.
 
-The CIFAR10 dataset is available for download from the [website](https://www.cs.toronto.edu/~kriz/cifar.html.) of the Canadian Institute for Advanced Research (CIFAR):
+The CIFAR10 dataset is available for download from the [website](https://www.cs.toronto.edu/~kriz/cifar.html.) of the Canadian Institute for Advanced Research (CIFAR)
+
+**Sample Images**
+![](<../Files/Sample CIFAR10 Images.png>)
 
 <br>
 
@@ -342,8 +344,6 @@ Estimated Total Size (MB): 2.30
 ----------------------------------------------------------------
 
 ```
-
-### Receptive Field
 
 <br>
 
@@ -702,3 +702,13 @@ Test set: Average loss: 0.6970, Accuracy: 7587/10000 (75.87%)
 <br>
 
 ## Findings
+
+- [Differences](https://towardsdatascience.com/different-normalization-layers-in-deep-learning-1a7214ff71d6)
+  - Batch Normalization focuses on standardizing the inputs to any particular layer(i.e. activations from previous layers). Standardizing the inputs mean that inputs to any layer in the network should have approximately zero mean and unit variance.
+  - Layer Normalization normalizes the activations along the feature direction instead of mini-batch direction.
+  - Group Normalization is also applied along the feature direction but unlike LN, it divides the features into certain groups and normalizes each group separately.
+- General Observations
+  - In terms of test accuracy group Normalization seems to be performing best followed by layer Normalization and then batch Normalization
+  - All 3 models are showing over fitting behavior in spite of regularization and drop outs. This is something that will need to be investigated in the subsequent weeks along with image augmentation
+  - Here we stuck with the same batch size 64 but it would be interesting to assess the impact of batch size on batch Normalization and the resulting accuracy
+  - Group and layer Normalization might not be shining in this scenario as we aren't relying on fully connected layers
