@@ -56,7 +56,15 @@ def train_model(
     train_losses.append(train_loss / len(train_loader))
 
 
-def test_model(model, device, test_loader, criterion, test_acc, test_losses):
+def test_model(
+    model,
+    device,
+    test_loader,
+    criterion,
+    test_acc,
+    test_losses,
+    misclassified_image_data,
+):
     """
     Function to test the model on the test dataset.
     """
@@ -78,6 +86,18 @@ def test_model(model, device, test_loader, criterion, test_acc, test_losses):
             output = model(data)
             # Calculate loss for the batch
             test_loss += criterion(output, target, reduction="sum").item()
+
+            # Get the index of the max log-probability
+            pred = output.argmax(dim=1)
+            # Check if the prediction is correct
+            correct_mask = pred.eq(target)
+            # Save the incorrect predictions
+            incorrect_indices = ~correct_mask
+
+            # Store images incorrectly predicted, generated predictions and the actual value
+            misclassified_image_data["images"].extend(data[incorrect_indices])
+            misclassified_image_data["ground_truths"].extend(target[incorrect_indices])
+            misclassified_image_data["predicted_vals"].extend(pred[incorrect_indices])
 
             # Get the count of correct predictions
             correct += get_correct_prediction_count(output, target)
