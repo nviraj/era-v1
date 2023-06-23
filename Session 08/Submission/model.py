@@ -121,7 +121,7 @@ class NormalizationModel(nn.Module):
     # Class variable to print shape
     print_shape = False
     # Default dropout value
-    dropout_value = 0.025
+    dropout_value = 0.05
 
     def __init__(self, normalization_method="batch", num_groups=2):
         super().__init__()
