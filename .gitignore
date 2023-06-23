@@ -165,3 +165,7 @@ Course Materials/*
 # Data folder
 */data/*
 data/*
+
+# Pytorch model
+*.pt
+*.pkl
