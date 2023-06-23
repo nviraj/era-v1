@@ -90,7 +90,7 @@ def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
 def plot_misclassified_images(data, class_label, num_images=10):
     """Plot the misclassified images from the test dataset."""
     # Calculate the number of images to plot
-    num_images = min(num_images, len(data))
+    num_images = min(num_images, len(data["ground_truths"]))
     # calculate the number of rows and columns to plot
     num_cols = 2
     num_rows = int(np.ceil(num_images / num_cols))
@@ -108,7 +108,7 @@ def plot_misclassified_images(data, class_label, num_images=10):
         plt.tight_layout()
         plt.axis("off")
         plt.imshow(convert_back_image(image))
-        plt.title(f"Actual: {class_label[label]}, Predicted: {class_label[pred]}")
+        plt.title(f"""ACT: {class_label[label]}, PRED: {class_label[pred]}""")
         plt.xticks([])
         plt.yticks([])
 
