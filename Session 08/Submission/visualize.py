@@ -63,7 +63,7 @@ def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
     return fig, axs
 
 
-def plot_misclassified_images(class_label, num_images=10):
+def plot_misclassified_images(data, class_label, num_images=10):
     """Plot the misclassified images from the test dataset."""
     num_rows = 5
     # Adjust the number of columns based on the number of images
@@ -72,17 +72,15 @@ def plot_misclassified_images(class_label, num_images=10):
     fig, axs = plt.subplots(num_rows, num_cols, figsize=(num_cols * 2, num_rows * 2))
 
     for i in range(num_images):
-        #
         row_idx = i // num_cols
         col_idx = i % num_cols
 
-        img = test_incorrect_pred["images"][i].cpu().numpy()
+        img = data["images"][i].cpu().numpy()
         img = np.transpose(img, (1, 2, 0))
-        img = (img - np.min(img)) / (
-            np.max(img) - np.min(img)
+        img = convert_back_image(img)
         )  # Normalize the image data
-        label = test_incorrect_pred["ground_truths"][i].cpu().item()
-        pred = test_incorrect_pred["predicted_vals"][i].cpu().item()
+        label = data["ground_truths"][i].cpu().item()
+        pred = data["predicted_vals"][i].cpu().item()
 
         axs[row_idx, col_idx].imshow(img)
         axs[row_idx, col_idx].set_title(
@@ -91,4 +89,4 @@ def plot_misclassified_images(class_label, num_images=10):
         axs[row_idx, col_idx].axis("off")
 
     plt.tight_layout()
-    plt.show()
+    return fig, axs
