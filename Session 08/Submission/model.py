@@ -137,7 +137,7 @@ class NormalizationModel(nn.Module):
         #  Model Notes
 
         self.C1 = nn.Sequential(
-            nn.Conv2d(3, 12, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(3, 12, kernel_size=(3, 3), stride=1, padding=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
             nn.BatchNorm2d(12)
@@ -146,7 +146,7 @@ class NormalizationModel(nn.Module):
         )
 
         self.C2 = nn.Sequential(
-            nn.Conv2d(12, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(12, 16, kernel_size=(3, 3), stride=1, padding=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
             nn.BatchNorm2d(16)
@@ -155,77 +155,79 @@ class NormalizationModel(nn.Module):
         )
 
         self.c3 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=1, stride=1, bias=False),
+            nn.Conv2d(16, 8, kernel_size=(1, 1), stride=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(16)
+            nn.BatchNorm2d(8)
             if self.norm == "batch"
-            else nn.GroupNorm(self.num_group, 16),
+            else nn.GroupNorm(self.num_group, 8),
         )
 
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
         self.C3 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(8, 24, kernel_size=(3, 3), stride=1, padding=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(16)
+            nn.BatchNorm2d(24)
             if self.norm == "batch"
-            else nn.GroupNorm(self.num_group, 16),
+            else nn.GroupNorm(self.num_group, 24),
         )
 
         self.C4 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(24, 24, kernel_size=(3, 3), stride=1, padding=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(16)
+            nn.BatchNorm2d(24)
             if self.norm == "batch"
-            else nn.GroupNorm(self.num_group, 16),
+            else nn.GroupNorm(self.num_group, 24),
         )
 
         self.C5 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(24, 24, kernel_size=(3, 3), stride=1, padding=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(16)
+            nn.BatchNorm2d(24)
             if self.norm == "batch"
-            else nn.GroupNorm(self.num_group, 16),
+            else nn.GroupNorm(self.num_group, 24),
         )
 
         self.c6 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=1, stride=1, bias=False),
+            nn.Conv2d(24, 12, kernel_size=(1, 1), stride=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(16)
+            nn.BatchNorm2d(12)
             if self.norm == "batch"
-            else nn.GroupNorm(self.num_group, 16),
+            else nn.GroupNorm(self.num_group, 12),
         )
 
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
 
         self.C7 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(12, 32, kernel_size=(3, 3), stride=1, padding=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(16)
+            nn.BatchNorm2d(32)
             if self.norm == "batch"
-            else nn.GroupNorm(self.num_group, 16),
+            else nn.GroupNorm(self.num_group, 32),
         )
 
         self.C8 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(32, 32, kernel_size=(3, 3), stride=1, padding=1, bias=False),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(16)
+            nn.BatchNorm2d(32)
             if self.norm == "batch"
-            else nn.GroupNorm(self.num_group, 16),
+            else nn.GroupNorm(self.num_group, 32),
         )
 
         self.C9 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1, bias=False)
+            nn.Conv2d(32, 32, kernel_size=(3, 3), stride=1, padding=1, bias=False)
         )
         self.gap = nn.Sequential(nn.AdaptiveAvgPool2d(1))
-        self.c10 = nn.Sequential(nn.Conv2d(16, 10, kernel_size=1, stride=1, bias=False))
+        self.c10 = nn.Sequential(
+            nn.Conv2d(32, 10, kernel_size=(1, 1), stride=1, bias=False)
+        )
 
     def print_view(self, x):
         """Print shape of the model"""
@@ -242,6 +244,7 @@ class NormalizationModel(nn.Module):
         x = self.c3(x)
         self.print_view(x)
         x = self.pool1(x)
+        x = self.C3(x)
         self.print_view(x)
         x = self.C4(x)
         self.print_view(x)
