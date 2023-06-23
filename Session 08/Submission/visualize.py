@@ -63,30 +63,6 @@ def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
     return fig, axs
 
 
-# def plot_misclassified_images(data, class_label, num_images=10):
-#     """Plot the misclassified images from the test dataset."""
-
-#     for i in range(num_images):
-#         row_idx = i // num_cols
-#         col_idx = i % num_cols
-
-#         img = data["images"][i].cpu().numpy()
-#         img = np.transpose(img, (1, 2, 0))
-#         img = convert_back_image(img)
-#         )  # Normalize the image data
-#         label = data["ground_truths"][i].cpu().item()
-#         pred = data["predicted_vals"][i].cpu().item()
-
-#         axs[row_idx, col_idx].imshow(img)
-#         axs[row_idx, col_idx].set_title(
-#             f"Actual: {class_label[label]}, Predicted: {class_label[pred]}"
-#         )
-#         axs[row_idx, col_idx].axis("off")
-
-#     plt.tight_layout()
-#     return fig, axs
-
-
 def plot_misclassified_images(data, class_label, num_images=10):
     """Plot the misclassified images from the test dataset."""
     # Calculate the number of images to plot
@@ -96,7 +72,7 @@ def plot_misclassified_images(data, class_label, num_images=10):
     num_rows = int(np.ceil(num_images / num_cols))
 
     # Initialize a subplot with the required number of rows and columns
-    fig, axs = plt.subplots(num_rows, num_cols, figsize=(num_cols * 4, num_rows * 4))
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(num_cols * 2, num_rows * 2))
 
     # Iterate through the images and plot them in the grid along with class labels
 
@@ -108,7 +84,7 @@ def plot_misclassified_images(data, class_label, num_images=10):
         plt.tight_layout()
         plt.axis("off")
         plt.imshow(convert_back_image(image))
-        plt.title(f"""ACT: {class_label[label]}, PRED: {class_label[pred]}""")
+        plt.title(f"""ACT: {class_label[label]} \nPRED: {class_label[pred]}""")
         plt.xticks([])
         plt.yticks([])
 
