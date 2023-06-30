@@ -1,3 +1,4 @@
+"""Module to define the model and train and test functions."""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -284,7 +285,7 @@ class Assignment9(nn.Module):
             # Layer 2
             nn.Conv2d(
                 in_channels=64,
-                out_channels=128,
+                out_channels=96,
                 kernel_size=(3, 3),
                 stride=1,
                 padding=1,
@@ -293,10 +294,10 @@ class Assignment9(nn.Module):
             ),
             nn.ReLU(),
             nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(128),
+            nn.BatchNorm2d(96),
             # Layer 3
             nn.Conv2d(
-                in_channels=128,
+                in_channels=96,
                 out_channels=64,
                 kernel_size=(3, 3),
                 stride=1,
