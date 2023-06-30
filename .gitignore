@@ -166,6 +166,7 @@ Course Materials/*
 */data/*
 data/*
 
-# Pytorch model
-*.pt
+# Pickle files
 *.pkl
+*.pt
+*.pth
