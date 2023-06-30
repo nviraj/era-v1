@@ -18,11 +18,11 @@ def get_device():
     return final_choice, torch.device(final_choice)
 
 
-def get_correct_prediction_count(pPrediction, pLabels):
+def get_correct_prediction_count(prediction, label):
     """
     Function to get the count of correct predictions.
     """
-    return pPrediction.argmax(dim=1).eq(pLabels).sum().item()
+    return prediction.argmax(dim=1).eq(label).sum().item()
 
 
 # Function to save the model
