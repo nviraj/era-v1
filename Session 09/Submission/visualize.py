@@ -77,9 +77,12 @@ def plot_misclassified_images(data, class_label, num_images=10):
     # Iterate through the images and plot them in the grid along with class labels
 
     for img_index in range(1, num_images + 1):
+        # Get the ground truth and predicted labels for the image
         label = data["ground_truths"][img_index - 1].cpu().item()
         pred = data["predicted_vals"][img_index - 1].cpu().item()
+        # Get the image
         image = data["images"][img_index - 1].cpu()
+        # Plot the image
         plt.subplot(num_rows, num_cols, img_index)
         plt.tight_layout()
         plt.axis("off")

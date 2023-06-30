@@ -116,11 +116,11 @@ def test_model(
     )
 
 
-############# Assignment 8 Model #############
+############# Assignment 9 Model #############
 
 
-# This is for Assignment 8
-class NormalizationModel(nn.Module):
+# This is for Assignment 9
+class Assignment9(nn.Module):
     """This defines the structure of the NN."""
 
     # Class variable to print shape
@@ -296,5 +296,7 @@ class NormalizationModel(nn.Module):
         x = x.view((x.shape[0], -1))
         self.print_view(x)
         x = F.log_softmax(x, dim=1)
+        # Add a line break before model summary
+        print("\n\n\n")
 
         return x
