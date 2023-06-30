@@ -1,3 +1,4 @@
+"""Module to define utility functions for the project."""
 import torch
 
 
@@ -15,6 +16,7 @@ def get_device():
     else:
         final_choice = "cpu"
 
+    # pylint: disable=E1101
     return final_choice, torch.device(final_choice)
 
 
