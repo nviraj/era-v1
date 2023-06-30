@@ -23,3 +23,23 @@ def get_correct_prediction_count(pPrediction, pLabels):
     Function to get the count of correct predictions.
     """
     return pPrediction.argmax(dim=1).eq(pLabels).sum().item()
+
+
+# Function to save the model
+# https://debuggercafe.com/saving-and-loading-the-best-model-in-pytorch/
+def save_model(epoch, model, optimizer, scheduler, batch_size, criterion, file_name):
+    """
+    Function to save the trained model along with other information to disk.
+    """
+    print(f"Saving model from epoch {epoch}...")
+    torch.save(
+        {
+            "epoch": epoch,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "scheduler_state_dict": scheduler.state_dict(),
+            "batch_size": batch_size,
+            "loss": criterion,
+        },
+        f"{file_name}.pth",
+    )
