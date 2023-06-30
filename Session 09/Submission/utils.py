@@ -33,7 +33,7 @@ def save_model(epoch, model, optimizer, scheduler, batch_size, criterion, file_n
     """
     Function to save the trained model along with other information to disk.
     """
-    print(f"Saving model from epoch {epoch}...")
+    # print(f"Saving model from epoch {epoch}...")
     torch.save(
         {
             "epoch": epoch,
@@ -43,5 +43,5 @@ def save_model(epoch, model, optimizer, scheduler, batch_size, criterion, file_n
             "batch_size": batch_size,
             "loss": criterion,
         },
-        f"{file_name}.pth",
+        file_name,
     )
