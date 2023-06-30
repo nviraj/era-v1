@@ -728,9 +728,10 @@ Here are some misclassified images with labels:
   - Depthwise separable convolution implemented in block 3
   - Dilated convolution implemented in block 4
   - Global Average Pooling implemented after block 4
-  - Output block has fully connected layers
-- Total number of epochs is 50 and >85% test accuracy was consistently achieved from Epoch 37
-- Highest test accuracy is 86.3600% and highest train accuracy is 79.1600%
+  - Output block has fully connected layers after GAP
+- Paramter count: 192,298 (Target 200,000)
+- **_Total number of epochs is 50 and >85% test accuracy was consistently achieved from Epoch 37_**
+- **_Highest test accuracy is 86.3600% and highest train accuracy is 79.1600%_**
 - Training is being done in a harder way with cutout etc. to ensure that the model does not overfit and learns well
 
 <br>
