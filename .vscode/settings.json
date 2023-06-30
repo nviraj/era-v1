@@ -3,8 +3,11 @@
   "python.terminal.activateEnvironment": true,
   "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
   {
-  "[markdown]": {
-    "files.trimTrailingWhitespace": false
-  }
-}
+    "[markdown]": {
+      "files.trimTrailingWhitespace": false
+    }
+  },
+  "python.linting.pylintArgs": [
+    "--generated-members=numpy.* ,torch.* ,cv2.* , cv.*"
+  ]
 }
