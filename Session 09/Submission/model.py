@@ -1,9 +1,16 @@
 """Module to define the model and train and test functions."""
+
+# from functools import partial
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 from utils import get_correct_prediction_count
+
+# # # Reset tqdm
+# # tqdm._instances.clear()
+# tqdm = partial(tqdm, position=0, leave=True)
 
 ############# Train and Test Functions #############
 
@@ -17,6 +24,7 @@ def train_model(
 
     # Initialize the model to train mode
     model.train()
+
     # Initialize progress bar
     pbar = tqdm(train_loader)
 
@@ -50,9 +58,11 @@ def train_model(
         processed += len(data)
 
         # Update the progress bar
-        pbar.set_description(
-            desc=f"Train: Loss={loss.item():0.4f}, Batch_id={batch_idx}, Accuracy={100*correct/processed:0.2f}"
-        )
+        msg = f"Train: Loss={loss.item():0.4f}, Batch_id={batch_idx}, Accuracy={100*correct/processed:0.2f}"
+        pbar.set_description(desc=msg)
+
+    # Close the progress bar
+    pbar.close()
 
     # Append the final loss and accuracy for the epoch
     train_acc.append(100 * correct / processed)
@@ -340,7 +350,5 @@ class Assignment9(nn.Module):
         x = self.output_block(x)
         self.print_view(x)
         x = F.log_softmax(x, dim=1)
-        # Add a line break before model summary
-        print("\n\n\n")
 
         return x
