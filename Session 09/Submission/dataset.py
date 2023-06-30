@@ -31,15 +31,15 @@ class CIFAR10Transforms(Dataset):
     def __len__(self):
         return len(self.dataset)
 
-    def __repr__(self):
-        return (
-            f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
-        )
+    # def __repr__(self):
+    #     return (
+    #         f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
+    #     )
 
-    def __str__(self):
-        return (
-            f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
-        )
+    # def __str__(self):
+    #     return (
+    #         f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
+    #     )
 
 
 def apply_cifar_image_transformations(mean, std, cutout_size):
@@ -105,22 +105,22 @@ def split_cifar_data(data_path, train_transforms, test_transforms):
     """
     Function to download the MNIST data
     """
-    print("Downloading CIFAR10 dataset\n")
+    # print("Downloading CIFAR10 dataset\n")
     # Download MNIST dataset
     train_data = datasets.CIFAR10(data_path, train=True, download=True)
     test_data = datasets.CIFAR10(data_path, train=False, download=True)
 
-    # Calculate and print the mean and standard deviation of the dataset
-    mean, std = calculate_mean_std(train_data)
-    print(f"\nMean: {mean}")
-    print(f"Std: {std}\n")
+    # # Calculate and print the mean and standard deviation of the dataset
+    # mean, std = calculate_mean_std(train_data)
+    # print(f"\nMean: {mean}")
+    # print(f"Std: {std}\n")
 
     # Apply transforms on the dataset
     # Use the above class to apply transforms on the dataset using albumentations
     train_data = CIFAR10Transforms(train_data, train_transforms)
     test_data = CIFAR10Transforms(test_data, test_transforms)
 
-    print("Transforms applied on the dataset\n")
+    # print("Transforms applied on the dataset\n")
 
     return train_data, test_data
 
