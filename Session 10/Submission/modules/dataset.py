@@ -53,38 +53,28 @@ def apply_cifar_image_transformations(mean, std, cutout_size):
     # Apply the required transformations to the MNIST dataset
     train_transforms = A.Compose(
         [
-            # https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.HorizontalFlip
-            A.HorizontalFlip(),
-            # https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.ShiftScaleRotate
-            A.ShiftScaleRotate(
-                shift_limit=0.1, scale_limit=0.2, rotate_limit=10, p=0.5
-            ),
-            # # https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.PadIfNeeded
-            # # https://answers.opencv.org/question/50706/border_reflect-vs-border_reflect_101/
-            # A.PadIfNeeded(
-            #     min_height=40, min_width=40, border_mode=cv2.BORDER_REFLECT_101, p=1
-            # ),
-            # https://albumentations.ai/docs/api_reference/augmentations/dropout/coarse_dropout/#coarsedropout-augmentation-augmentationsdropoutcoarse_dropout
-            A.CoarseDropout(
-                max_holes=1,
-                max_height=cutout_size,
-                max_width=cutout_size,
-                min_holes=1,
-                min_height=cutout_size,
-                min_width=cutout_size,
-                fill_value=list(mean),
-                mask_fill_value=None,
-            ),
-            # # https://albumentations.ai/docs/api_reference/augmentations/dropout/cutout/#cutout-augmentation-augmentationsdropoutcutout
-            # A.Cutout(
-            #     max_h_size=cutout_size,
-            #     max_w_size=cutout_size,
-            #     num_holes=1,
-            #     fill_value = cifar_mean)
             # normalize the images with mean and standard deviation from the whole dataset
             # https://albumentations.ai/docs/api_reference/augmentations/transforms/#albumentations.augmentations.transforms.Normalize
             # # transforms.Normalize(cifar_mean, cifar_std),
             A.Normalize(mean=list(mean), std=list(std)),
+            # RandomCrop 32, 32 (after padding of 4)
+            # https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.PadIfNeeded
+            # MinHeight and MinWidth are set to 36 to ensure that the image is padded to 36x36 after padding
+            # border_mode (OpenCV flag): flag that is used to specify the pixel extrapolation method. Should be one of:
+            # cv2.BORDER_CONSTANT, cv2.BORDER_REPLICATE, cv2.BORDER_REFLECT, cv2.BORDER_WRAP, cv2.BORDER_REFLECT_101.
+            # Default: cv2.BORDER_REFLECT_101
+            A.PadIfNeeded(min_height=36, min_width=36),
+            # https://albumentations.ai/docs/api_reference/augmentations/crops/transforms/#albumentations.augmentations.crops.transforms.RandomCrop
+            A.RandomCrop(32, 32),
+            # FlipLR
+            # https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.HorizontalFlip
+            A.HorizontalFlip(),
+            # CutOut(8, 8)
+            # https://albumentations.ai/docs/api_reference/augmentations/dropout/cutout/#albumentations.augmentations.dropout.cutout.Cutout
+            # Because we normalized the images with mean and standard deviation from the whole dataset, the fill_value is set to the mean of the dataset
+            A.Cutout(
+                num_holes=1, max_h_size=cutout_size, max_w_size=cutout_size, p=1.0
+            ),
             # Convert the images to tensors
             # # transforms.ToTensor(),
             ToTensorV2(),
