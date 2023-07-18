@@ -9,6 +9,10 @@ from albumentations.pytorch.transforms import ToTensorV2
 from torch.utils.data import Dataset
 from torchvision import datasets
 
+# Use precomputed values for mean and standard deviation of the dataset
+CIFAR_MEAN = (0.4915, 0.4823, 0.4468)
+CIFAR_STD = (0.2470, 0.2435, 0.2616)
+
 
 class CIFAR10Transforms(Dataset):
     """Apply albumentations augmentations to CIFAR10 dataset"""
