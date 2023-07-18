@@ -13,218 +13,181 @@ class CustomResNet(nn.Module):
     # Class variable to print shape
     print_shape = False
     # Default dropout value
-    dropout_value = 0.05
+    dropout_value = 0.01
 
     def __init__(self):
         super().__init__()
 
         #  Model Notes
-        # Stride = 2 implemented in last layer of block 2
-        # Depthwise separable convolution implemented in block 3
-        # Dilated convolution implemented in block 4
-        # Global Average Pooling implemented after block 4
-        # Output block has fully connected layers
 
-        self.block1 = nn.Sequential(
-            # Layer 1
+        # PrepLayer - Conv 3x3 s1, p1) >> BN >> RELU [64k]
+        # 1. Input size: 32x32x3
+        self.prep = nn.Sequential(
             nn.Conv2d(
                 in_channels=3,
-                out_channels=8,
-                kernel_size=(3, 3),
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(8),
-            # Layer 2
-            nn.Conv2d(
-                in_channels=8,
-                out_channels=8,
-                kernel_size=(3, 3),
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(8),
-            # Layer 3
-            nn.Conv2d(
-                in_channels=8,
-                out_channels=12,
-                kernel_size=(3, 3),
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(12),
-        )
-
-        self.block2 = nn.Sequential(
-            # Layer 1
-            nn.Conv2d(
-                in_channels=12,
-                out_channels=16,
-                kernel_size=(3, 3),
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(16),
-            # Layer 2
-            nn.Conv2d(
-                in_channels=16,
-                out_channels=32,
-                kernel_size=(3, 3),
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(32),
-            # Layer 3
-            nn.Conv2d(
-                in_channels=32,
-                out_channels=24,
-                kernel_size=(3, 3),
-                stride=2,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(24),
-        )
-
-        self.block3 = nn.Sequential(
-            # Layer 1
-            nn.Conv2d(
-                in_channels=24,
-                out_channels=32,
-                kernel_size=(3, 3),
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(32),
-            ##################### Depthwise Convolution #####################
-            # Layer 2
-            nn.Conv2d(
-                in_channels=32,
-                out_channels=128,
-                kernel_size=(3, 3),
-                groups=32,
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(128),
-            # Layer 3
-            nn.Conv2d(
-                in_channels=128,
-                out_channels=32,
-                kernel_size=(3, 3),
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(32),
-        )
-
-        self.block4 = nn.Sequential(
-            ##################### Dilated Convolution #####################
-            # Layer 1
-            nn.Conv2d(
-                in_channels=32,
                 out_channels=64,
                 kernel_size=(3, 3),
                 stride=1,
                 padding=1,
-                dilation=2,
+                dilation=1,
                 bias=False,
             ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
             nn.BatchNorm2d(64),
-            # Layer 2
+            nn.ReLU(),
+        )
+
+        # Layer1: X = Conv 3x3 (s1, p1) >> MaxPool2D >> BN >> RELU [128k]
+        self.layer1_x = nn.Sequential(
             nn.Conv2d(
                 in_channels=64,
-                out_channels=96,
+                out_channels=128,
                 kernel_size=(3, 3),
                 stride=1,
                 padding=1,
                 dilation=1,
                 bias=False,
             ),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.BatchNorm2d(128),
             nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(96),
-            # Layer 3
-            nn.Conv2d(
-                in_channels=96,
-                out_channels=64,
-                kernel_size=(3, 3),
-                stride=1,
-                padding=1,
-                dilation=1,
-                bias=False,
-            ),
-            nn.ReLU(),
-            nn.Dropout(self.dropout_value),
-            nn.BatchNorm2d(64),
         )
 
-        ##################### GAP #####################
-        self.gap = nn.Sequential(nn.AdaptiveAvgPool2d(1))
+        # Layer1: R1 = ResBlock( (Conv-BN-ReLU-Conv-BN-ReLU))(X) [128k]
+        self.layer1_r1 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=128,
+                kernel_size=(3, 3),
+                stride=1,
+                padding=1,
+                dilation=1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=128,
+                kernel_size=(3, 3),
+                stride=1,
+                padding=1,
+                dilation=1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+        )
 
-        ##################### Fully Connected Layer #####################
-        self.output_block = nn.Sequential(nn.Linear(64, 32), nn.Linear(32, 10))
+        # Layer 2: Conv 3x3 [256k], MaxPooling2D, BN, ReLU
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=256,
+                kernel_size=(3, 3),
+                stride=1,
+                padding=1,
+                dilation=1,
+                bias=False,
+            ),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+        )
 
-    def print_view(self, x):
+        # Layer 3: X = Conv 3x3 (s1, p1) >> MaxPool2D >> BN >> RELU [512k]
+        self.layer3_x = nn.Sequential(
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=512,
+                kernel_size=(3, 3),
+                stride=1,
+                padding=1,
+                dilation=1,
+                bias=False,
+            ),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+        )
+
+        # Layer 3: R2 = ResBlock( (Conv-BN-ReLU-Conv-BN-ReLU))(X) [512k]
+        self.layer3_r2 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=512,
+                out_channels=512,
+                kernel_size=(3, 3),
+                stride=1,
+                padding=1,
+                dilation=1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=512,
+                out_channels=512,
+                kernel_size=(3, 3),
+                stride=1,
+                padding=1,
+                dilation=1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+        )
+
+        # MaxPooling with Kernel Size 4
+        # If stride is None, it is set to kernel_size
+        self.maxpool = nn.MaxPool2d(kernel_size=4, stride=4)
+
+        # FC Layer
+        self.fc = nn.Linear(512, 10)
+
+    def print_view(self, x, msg=""):
         """Print shape of the model"""
         if self.print_shape:
-            print(x.shape)
+            if msg != "":
+                print(msg, "\n", x.shape, "\n")
+            else:
+                print(x.shape)
 
     def forward(self, x):
         """Forward pass"""
 
-        x = self.block1(x)
-        self.print_view(x)
-        x = self.block2(x)
-        self.print_view(x)
-        x = self.block3(x)
-        self.print_view(x)
-        x = self.block4(x)
-        self.print_view(x)
-        x = self.gap(x)
-        self.print_view(x)
-        # Flatten the layer
-        x = x.view((x.shape[0], -1))
-        self.print_view(x)
-        x = self.output_block(x)
-        self.print_view(x)
-        x = F.log_softmax(x, dim=1)
+        # PrepLayer
+        x = self.prep(x)
+        self.print_view(x, "PrepLayer")
 
-        return x
+        # Layer 1
+        x = self.layer1_x(x)
+        self.print_view(x, "Layer 1, X")
+        r1 = self.layer1_r1(x)
+        self.print_view(r1, "Layer 1, R1")
+        x = x + r1
+        self.print_view(x, "Layer 1, X + R1")
+
+        # Layer 2
+        x = self.layer2(x)
+        self.print_view(x, "Layer 2")
+
+        # Layer 3
+        x = self.layer3_x(x)
+        self.print_view(x, "Layer 3, X")
+        r2 = self.layer3_r2(x)
+        self.print_view(r2, "Layer 3, R2")
+        x = x + r2
+        self.print_view(x, "Layer 3, X + R2")
+
+        # MaxPooling
+        x = self.maxpool(x)
+        self.print_view(x, "Max Pooling")
+
+        # FC Layer
+        # Reshape before FC such that it becomes 1D
+        x = x.view(x.shape[0], -1)
+        self.print_view(x, "Reshape before FC")
+        x = self.fc(x)
+        self.print_view(x, "After FC")
+
+        # Softmax
+        return F.log_softmax(x, dim=-1)
