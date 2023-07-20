@@ -167,7 +167,7 @@ def train_and_test_model(
 
         # Should we save the incorrect predictions for this epoch?
         # Do this only for the last epoch, if not you will run out of memory
-        if epoch == num_epochs + 1:
+        if epoch == num_epochs:
             save_incorrect_predictions = True
         else:
             save_incorrect_predictions = False
