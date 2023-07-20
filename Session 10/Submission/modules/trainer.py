@@ -4,7 +4,7 @@
 
 import torch
 from tqdm import tqdm
-from utils import get_correct_prediction_count
+from utils import get_correct_prediction_count, save_model
 
 # # # Reset tqdm
 # # tqdm._instances.clear()
@@ -13,9 +13,7 @@ from utils import get_correct_prediction_count
 ############# Train and Test Functions #############
 
 
-def train_model(
-    model, device, train_loader, optimizer, criterion, train_acc, train_losses
-):
+def train_model(model, device, train_loader, optimizer, criterion):
     """
     Function to train the model on the train dataset.
     """
@@ -62,9 +60,11 @@ def train_model(
     # Close the progress bar
     pbar.close()
 
-    # Append the final loss and accuracy for the epoch
-    train_acc.append(100 * correct / processed)
-    train_losses.append(train_loss / len(train_loader))
+    # Return the final loss and accuracy for the epoch
+    current_train_accuracy = 100 * correct / processed
+    current_train_loss = train_loss / len(train_loader)
+
+    return current_train_accuracy, current_train_loss
 
 
 def test_model(
@@ -72,8 +72,6 @@ def test_model(
     device,
     test_loader,
     criterion,
-    test_acc,
-    test_losses,
     misclassified_image_data,
 ):
     """
@@ -115,11 +113,17 @@ def test_model(
 
     # Calculate the final loss
     test_loss /= len(test_loader.dataset)
-    # Append the final loss and accuracy for the epoch
-    test_acc.append(100.0 * correct / len(test_loader.dataset))
-    test_losses.append(test_loss)
+
+    # Return the final loss and accuracy for the epoch
+    current_test_accuracy = 100.0 * correct / len(test_loader.dataset)
+    current_test_loss = test_loss
 
     # Print the final test loss and accuracy
     print(
-        f"Test set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100.0 * correct / len(test_loader.dataset):.2f}%)"
+        f"Test set: Average loss: {current_test_loss:.4f}, ",
+        f"Accuracy: {correct}/{len(test_loader.dataset)} ",
+        "({current_test_accuracy:.2f}%)",
     )
+
+    # Return the final loss and accuracy for the epoch
+    return current_test_accuracy, current_test_loss
