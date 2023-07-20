@@ -129,7 +129,7 @@ def test_model(
     print(
         f"Test set: Average loss: {current_test_loss:.4f}, ",
         f"Accuracy: {correct}/{len(test_loader.dataset)} ",
-        "({current_test_accuracy:.2f}%)",
+        f"({current_test_accuracy:.2f}%)",
     )
 
     # Return the final loss and accuracy for the epoch
