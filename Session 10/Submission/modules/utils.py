@@ -49,10 +49,16 @@ def save_model(epoch, model, optimizer, scheduler, batch_size, criterion, file_n
 
 # Given a list of train_losses, train_accuracies, test_losses,
 # test_accuracies, loop through epoch and print the metrics
-def pretty_print_metrics(num_epochs, train_losses, train_acc, test_losses, test_acc):
+def pretty_print_metrics(num_epochs, results):
     """
     Function to print the metrics in a pretty format.
     """
+    # Extract train_losses, train_acc, test_losses, test_acc from results
+    train_losses = results["train_losses"]
+    train_acc = results["train_acc"]
+    test_losses = results["test_losses"]
+    test_acc = results["test_acc"]
+
     for i in range(num_epochs):
         print(
             f"Epoch: {i+1:02d}, Train Loss: {train_losses[i]:.4f}, "
