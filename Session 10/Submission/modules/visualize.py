@@ -44,10 +44,15 @@ def plot_sample_training_images(batch_data, batch_label, class_label, num_images
     return fig, axs
 
 
-def plot_train_test_metrics(train_losses, train_acc, test_losses, test_acc):
+def plot_train_test_metrics(results):
     """
     Function to plot the training and test metrics.
     """
+    # Extract train_losses, train_acc, test_losses, test_acc from results
+    train_losses = results["train_losses"]
+    train_acc = results["train_acc"]
+    test_losses = results["test_losses"]
+    test_acc = results["test_acc"]
 
     # Plot the graphs in a 2x2 grid showing the training and test metrics
     fig, axs = plt.subplots(2, 2, figsize=(15, 10))
