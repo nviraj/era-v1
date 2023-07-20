@@ -95,7 +95,7 @@ def test_model(
             # Predict using model
             output = model(data)
             # Calculate loss for the batch
-            test_loss += criterion(output, target, reduction="sum").item()
+            test_loss += criterion(output, target).item()
 
             # Get the index of the max log-probability
             pred = output.argmax(dim=1)
