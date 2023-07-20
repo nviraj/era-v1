@@ -3,8 +3,8 @@
 # from functools import partial
 
 import torch
+from modules.utils import get_correct_prediction_count, save_model
 from tqdm import tqdm
-from utils import get_correct_prediction_count, save_model
 
 # # # Reset tqdm
 # # tqdm._instances.clear()
