@@ -73,6 +73,7 @@ def test_model(
     test_loader,
     criterion,
     misclassified_image_data,
+    save_incorrect_predictions=False,
 ):
     """
     Function to test the model on the test dataset.
@@ -103,10 +104,16 @@ def test_model(
             # Save the incorrect predictions
             incorrect_indices = ~correct_mask
 
-            # Store images incorrectly predicted, generated predictions and the actual value
-            misclassified_image_data["images"].extend(data[incorrect_indices])
-            misclassified_image_data["ground_truths"].extend(target[incorrect_indices])
-            misclassified_image_data["predicted_vals"].extend(pred[incorrect_indices])
+            # Do this only for last epoch, if not you will run out of memory
+            if save_incorrect_predictions:
+                # Store images incorrectly predicted, generated predictions and the actual value
+                misclassified_image_data["images"].extend(data[incorrect_indices])
+                misclassified_image_data["ground_truths"].extend(
+                    target[incorrect_indices]
+                )
+                misclassified_image_data["predicted_vals"].extend(
+                    pred[incorrect_indices]
+                )
 
             # Get the count of correct predictions
             correct += get_correct_prediction_count(output, target)
@@ -127,3 +134,78 @@ def test_model(
 
     # Return the final loss and accuracy for the epoch
     return current_test_accuracy, current_test_loss
+
+
+def train_and_test_model(
+    batch_size,
+    num_epochs,
+    model,
+    device,
+    train_loader,
+    test_loader,
+    optimizer,
+    criterion,
+    scheduler,
+    misclassified_image_data,
+):
+    """Trains and tests the model by iterating through epochs"""
+
+    print(f"\n\nBatch size: {batch_size}, Total epochs: {num_epochs}\n\n")
+
+    # Hold the results for every epoch
+    results = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
+
+    # Run the model for NUM_EPOCHS
+    for epoch in range(1, num_epochs + 1):
+        # Print the current epoch
+        print(f"Epoch {epoch}")
+
+        # Train the model
+        epoch_train_accuracy, epoch_train_loss = train_model(
+            model, device, train_loader, optimizer, criterion
+        )
+
+        # Should we save the incorrect predictions for this epoch?
+        # Do this only for the last epoch, if not you will run out of memory
+        if epoch == num_epochs + 1:
+            save_incorrect_predictions = True
+        else:
+            save_incorrect_predictions = False
+
+        # Test the model
+        epoch_test_accuracy, epoch_test_loss = test_model(
+            model,
+            device,
+            test_loader,
+            criterion,
+            misclassified_image_data,
+            save_incorrect_predictions,
+        )
+
+        # Append the train and test accuracies and losses
+        results["train_loss"].append(epoch_train_loss)
+        results["train_acc"].append(epoch_train_accuracy)
+        results["test_loss"].append(epoch_test_loss)
+        results["test_acc"].append(epoch_test_accuracy)
+
+        # Check if the accuracy is the best accuracy till now
+        # Save the model if you get the best test accuracy
+        if max(results["test_acc"]) == epoch_test_accuracy:
+            print("Saving the model as best test accuracy till now is achieved!")
+            save_model(
+                epoch,
+                model,
+                optimizer,
+                scheduler,
+                batch_size,
+                criterion,
+                file_name="model_best_epoch.pth",
+            )
+
+        # # Passing the latest test loss in list to scheduler to adjust learning rate
+        # scheduler.step(test_losses[-1])
+        scheduler.step()
+        # # # Line break before next epoch
+        print("\n")
+
+        return results
