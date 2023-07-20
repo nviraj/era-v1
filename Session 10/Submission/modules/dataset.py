@@ -13,6 +13,23 @@ from torchvision import datasets
 CIFAR_MEAN = (0.4915, 0.4823, 0.4468)
 CIFAR_STD = (0.2470, 0.2435, 0.2616)
 
+# Create class labels and convert to tuple
+CIFAR_CLASSES = tuple(
+    c.capitalize()
+    for c in [
+        "plane",
+        "car",
+        "bird",
+        "cat",
+        "deer",
+        "dog",
+        "frog",
+        "horse",
+        "ship",
+        "truck",
+    ]
+)
+
 
 class CIFAR10Transforms(Dataset):
     """Apply albumentations augmentations to CIFAR10 dataset"""
