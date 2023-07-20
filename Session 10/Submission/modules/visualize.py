@@ -49,9 +49,9 @@ def plot_train_test_metrics(results):
     Function to plot the training and test metrics.
     """
     # Extract train_losses, train_acc, test_losses, test_acc from results
-    train_losses = results["train_losses"]
+    train_losses = results["train_loss"]
     train_acc = results["train_acc"]
-    test_losses = results["test_losses"]
+    test_losses = results["test_loss"]
     test_acc = results["test_acc"]
 
     # Plot the graphs in a 2x2 grid showing the training and test metrics
