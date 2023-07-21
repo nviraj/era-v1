@@ -73,6 +73,7 @@ class CustomResNet(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.BatchNorm2d(128),
             nn.ReLU(),
+            nn.Dropout(self.dropout_value),
         )
 
         # Layer1: R1 = ResBlock( (Conv-BN-ReLU-Conv-BN-ReLU))(X) [128k]
@@ -88,6 +89,7 @@ class CustomResNet(nn.Module):
             ),
             nn.BatchNorm2d(128),
             nn.ReLU(),
+            nn.Dropout(self.dropout_value),
             nn.Conv2d(
                 in_channels=128,
                 out_channels=128,
@@ -99,6 +101,7 @@ class CustomResNet(nn.Module):
             ),
             nn.BatchNorm2d(128),
             nn.ReLU(),
+            nn.Dropout(self.dropout_value),
         )
 
         # Layer 2: Conv 3x3 [256k], MaxPooling2D, BN, ReLU
@@ -131,6 +134,7 @@ class CustomResNet(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.BatchNorm2d(512),
             nn.ReLU(),
+            nn.Dropout(self.dropout_value),
         )
 
         # Layer 3: R2 = ResBlock( (Conv-BN-ReLU-Conv-BN-ReLU))(X) [512k]
