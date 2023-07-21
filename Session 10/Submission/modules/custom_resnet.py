@@ -36,7 +36,7 @@ class CustomResNet(nn.Module):
     # Class variable to print shape
     print_shape = False
     # Default dropout value
-    dropout_value = 0.01
+    dropout_value = 0.02
 
     def __init__(self):
         super().__init__()
