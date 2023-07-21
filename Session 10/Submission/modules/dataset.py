@@ -100,6 +100,7 @@ def apply_cifar_image_transformations(mean, std, cutout_size):
                 min_holes=1,
                 min_height=cutout_size,
                 min_width=cutout_size,
+                p=1.0,
             ),
             # Convert the images to tensors
             # # transforms.ToTensor(),
