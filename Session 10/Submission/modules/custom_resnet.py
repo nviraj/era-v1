@@ -19,7 +19,6 @@ def detailed_model_summary(model, input_size, device):
             "output_size",
             "num_params",
             "trainable",
-            "mult_adds",
         ),
         device=device,
         verbose=1,
