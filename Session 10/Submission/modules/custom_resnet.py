@@ -170,7 +170,7 @@ class CustomResNet(nn.Module):
         """Print shape of the model"""
         if self.print_shape:
             if msg != "":
-                print(msg, "\n", x.shape, "\n")
+                print(msg, "\n\t", x.shape, "\n")
             else:
                 print(x.shape)
 
