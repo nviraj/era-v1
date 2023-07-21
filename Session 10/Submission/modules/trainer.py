@@ -191,7 +191,7 @@ def train_and_test_model(
         # Check if the accuracy is the best accuracy till now
         # Save the model if you get the best test accuracy
         if max(results["test_acc"]) == epoch_test_accuracy:
-            print("Saving the model as best test accuracy till now is achieved!")
+            # print("Saving the model as best test accuracy till now is achieved!")
             save_model(
                 epoch,
                 model,
