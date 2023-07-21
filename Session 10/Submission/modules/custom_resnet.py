@@ -23,6 +23,7 @@ def detailed_model_summary(model, input_size, device):
         ),
         device=device,
         verbose=1,
+        col_width=16,
     )
 
 
