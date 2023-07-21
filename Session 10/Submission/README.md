@@ -6,10 +6,8 @@
   - [Table of Contents](#table-of-contents)
   - [Assignment Objectives](#assignment-objectives)
   - [Code Overview](#code-overview)
-  - [Dataset Details](#dataset-details)
-  - [Transformations](#transformations)
-  - [Code Overview](#code-overview-1)
   - [Model Parameters](#model-parameters)
+  - [LR Finder](#lr-finder)
   - [Training logs](#training-logs)
   - [Test and Train Metrics](#test-and-train-metrics)
   - [Misclassified Images](#misclassified-images)
@@ -20,7 +18,7 @@
 
 Write a new network that has
 
-- [x] Target Accuracy: 90%
+- [x] Target Accuracy: 90% **(Final Test Accuracy - 90.06%)**
 - [x] Total Epochs = 24
 - [x] Uses One Cycle Policy with no annihilation, Max at Epoch 5, Uses LR Finder for Max
 - [x] Batch size = 512
@@ -30,48 +28,7 @@ Write a new network that has
 
 ## Code Overview
 
-Has the architecture to C1C2C3C40 (No MaxPooling, but 3 convolutions, where the last one has a stride of 2 instead) (If you can figure out how to use Dilated kernels here instead of MP or strided convolution, then 200 pts extra!)
-
-- [x] Total RF must be more than 44
-- [x] A Layer must use Depthwise Separable Convolution
-- [x] A Layers must use Dilated Convolution
-- [x] Use GAP (compulsory)
-- [x] Add FC after GAP to target #of classes (optional)
-- [x] Use Albumentation library and apply:
-  - [x] horizontal flip
-  - [x] shiftScaleRotate
-  - [x] coarseDropout (max_holes = 1, max_height=16px, max_width=16, min_holes = 1, min_height=16px, min_width=16px, fill_value=(mean of your dataset), mask_fill_value = None)
-- [x] Achieve 85% accuracy, as many epochs as you want
-- [x] Total Params to be less than 200k.
-- [x] Follows code-modularity (else 0 for full assignment)
-
-<br>
-
-## Dataset Details
-
-The CIFAR10 dataset is a collection of 60,000 32x32 color images, divided into 50,000 training images and 10,000 test images. The dataset contains 10 classes, each with 6,000 images: airplane, automobile, bird, cat, deer, dog, frog, horse, ship, and truck.
-
-The CIFAR10 dataset is available for download from the[website](https://www.cs.toronto.edu/~kriz/cifar.html.) of the Canadian Institute for Advanced Research (CIFAR)
-
-<br>
-
-## Transformations
-
-The following Transformations were applied using the [Albumentations](https://albumentations.ai/) library:
-
-- [HorizontalFlip](https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.HorizontalFlip)
-- [ShiftScaleRotate](https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.ShiftScaleRotate)
-- [CoarseDropout](https://albumentations.ai/docs/api_reference/augmentations/dropout/coarse_dropout/#coarsedropout-augmentation-augmentationsdropoutcoarse_dropout)
-- [Normalize](https://albumentations.ai/docs/api_reference/augmentations/transforms/#albumentations.augmentations.transforms.Normalize)
-
-Here are some sample images from training data post transformation:
-![](<../Files/Transformed Images - Train.png>)
-
-<br>
-
-## Code Overview
-
-We explore various Normalization techniques using Convolution neural networks on CIFAR10 data. To run the code, download the Notebook and modules. Then just run the Notebook and other modules will be automatically imported. The code is structured in a modular way as below:
+To run the code, download the Notebook. Then just run the Notebook and other modules will be automatically imported. The code is structured in a modular way as below:
 
 - **Modules**
   - [dataset.py](modules/dataset.py)
@@ -80,12 +37,15 @@ We explore various Normalization techniques using Convolution neural networks on
     - Class that applies the required transforms to dataset - CIFAR10Transforms()
     - Function to calculate mean and standard deviation of the data to normalize tensors - `calculate_mean_std()`
   - [custom_resnet.py](modules/custom_resnet.py)
-    - Train and test the model given the optimizer and criterion - `train_model()`, `test_model()`
-    - A class called Assignment9 which implements above specified neural network
+    - A class called CustomResNet which implements above specified neural network
+    - Detailed model summary - `detailed_model_summary()`
+  - [trainer.py](modules/trainer.py)
+    - Train and test the model given the optimizer and criterion - `train_model()`, `test_model()`, `train_and_test_model()`
   - [utils.py](modules/utils.py)
     - Function that detects and returns correct device including GPU and CPU - `get_device()`
     - Given a set of predictions and labels, return the cumulative correct count - `get_correct_prediction_count()`
     - Function to save model, epoch, optimizer, scheduler, loss and batch size - `save_model()`
+    - Pretty print training log - `pretty_print_metrics()`
   - [visualize.py](modules/visualize.py)
     - Given a normalize image along with mean and standard deviation for each channels, convert it back - `convert_back_image()`
     - Plot sample training images along with the labels - `plot_sample_training_images()`
@@ -217,14 +177,165 @@ Estimated Total Size (MB): 30.96
 
 <br>
 
+## LR Finder
+
+**Code**
+
+```
+# Create LR finder object
+lr_finder = LRFinder(model, optimizer, criterion)
+lr_finder.range_test(train_loader=train_loader, end_lr=10, num_iter=200, start_lr=1e-2)
+# https://github.com/davidtvs/pytorch-lr-finder/issues/88
+plot, suggested_lr = lr_finder.plot(suggest_lr=True)
+lr_finder.reset()
+# plot.figure.savefig("LRFinder - Suggested Max LR.png")
+
+```
+
+**Suggested Max LR**
+
+![Alt text](<../Files/LR Finder.png>)
+
+<br>
+
 ## Training logs
+
+```
+
+
+Batch size: 512, Total epochs: 24
+
+
+Epoch 1
+Train: Loss=1.5520, Batch_id=97, Accuracy=29.41: 100%|██████████| 98/98 [00:21<00:00,  4.63it/s]
+Test set: Average loss: 0.0033,  Accuracy: 4142/10000  (41.42%)
+
+
+Epoch 2
+Train: Loss=1.1888, Batch_id=97, Accuracy=49.93: 100%|██████████| 98/98 [00:20<00:00,  4.71it/s]
+Test set: Average loss: 0.0024,  Accuracy: 5616/10000  (56.16%)
+
+
+Epoch 3
+Train: Loss=0.9522, Batch_id=97, Accuracy=62.26: 100%|██████████| 98/98 [00:20<00:00,  4.75it/s]
+Test set: Average loss: 0.0020,  Accuracy: 6538/10000  (65.38%)
+
+
+Epoch 4
+Train: Loss=0.7499, Batch_id=97, Accuracy=70.58: 100%|██████████| 98/98 [00:21<00:00,  4.61it/s]
+Test set: Average loss: 0.0017,  Accuracy: 7122/10000  (71.22%)
+
+
+Epoch 5
+Train: Loss=0.6569, Batch_id=97, Accuracy=76.07: 100%|██████████| 98/98 [00:20<00:00,  4.77it/s]
+Test set: Average loss: 0.0013,  Accuracy: 7737/10000  (77.37%)
+
+
+Epoch 6
+Train: Loss=0.6123, Batch_id=97, Accuracy=79.32: 100%|██████████| 98/98 [00:21<00:00,  4.58it/s]
+Test set: Average loss: 0.0013,  Accuracy: 7900/10000  (79.00%)
+
+
+Epoch 7
+Train: Loss=0.4997, Batch_id=97, Accuracy=81.51: 100%|██████████| 98/98 [00:21<00:00,  4.63it/s]
+Test set: Average loss: 0.0010,  Accuracy: 8225/10000  (82.25%)
+
+
+Epoch 8
+Train: Loss=0.4568, Batch_id=97, Accuracy=83.16: 100%|██████████| 98/98 [00:21<00:00,  4.62it/s]
+Test set: Average loss: 0.0010,  Accuracy: 8387/10000  (83.87%)
+
+
+Epoch 9
+Train: Loss=0.4182, Batch_id=97, Accuracy=84.98: 100%|██████████| 98/98 [00:20<00:00,  4.73it/s]
+Test set: Average loss: 0.0010,  Accuracy: 8399/10000  (83.99%)
+
+
+Epoch 10
+Train: Loss=0.3464, Batch_id=97, Accuracy=86.14: 100%|██████████| 98/98 [00:21<00:00,  4.55it/s]
+Test set: Average loss: 0.0009,  Accuracy: 8524/10000  (85.24%)
+
+
+Epoch 11
+Train: Loss=0.4877, Batch_id=97, Accuracy=87.15: 100%|██████████| 98/98 [00:20<00:00,  4.71it/s]
+Test set: Average loss: 0.0009,  Accuracy: 8510/10000  (85.10%)
+
+
+Epoch 12
+Train: Loss=0.3593, Batch_id=97, Accuracy=88.12: 100%|██████████| 98/98 [00:21<00:00,  4.56it/s]
+Test set: Average loss: 0.0009,  Accuracy: 8542/10000  (85.42%)
+
+
+Epoch 13
+Train: Loss=0.3405, Batch_id=97, Accuracy=88.65: 100%|██████████| 98/98 [00:21<00:00,  4.58it/s]
+Test set: Average loss: 0.0009,  Accuracy: 8587/10000  (85.87%)
+
+
+Epoch 14
+Train: Loss=0.3532, Batch_id=97, Accuracy=89.91: 100%|██████████| 98/98 [00:21<00:00,  4.61it/s]
+Test set: Average loss: 0.0008,  Accuracy: 8723/10000  (87.23%)
+
+
+Epoch 15
+Train: Loss=0.2154, Batch_id=97, Accuracy=90.45: 100%|██████████| 98/98 [00:20<00:00,  4.68it/s]
+Test set: Average loss: 0.0008,  Accuracy: 8752/10000  (87.52%)
+
+
+Epoch 16
+Train: Loss=0.4153, Batch_id=97, Accuracy=90.77: 100%|██████████| 98/98 [00:21<00:00,  4.51it/s]
+Test set: Average loss: 0.0007,  Accuracy: 8891/10000  (88.91%)
+
+
+Epoch 17
+Train: Loss=0.2890, Batch_id=97, Accuracy=91.13: 100%|██████████| 98/98 [00:21<00:00,  4.58it/s]
+Test set: Average loss: 0.0007,  Accuracy: 8903/10000  (89.03%)
+
+
+Epoch 18
+Train: Loss=0.2290, Batch_id=97, Accuracy=92.10: 100%|██████████| 98/98 [00:21<00:00,  4.59it/s]
+Test set: Average loss: 0.0007,  Accuracy: 8901/10000  (89.01%)
+
+
+Epoch 19
+Train: Loss=0.1481, Batch_id=97, Accuracy=92.53: 100%|██████████| 98/98 [00:21<00:00,  4.64it/s]
+Test set: Average loss: 0.0007,  Accuracy: 8959/10000  (89.59%)
+
+
+Epoch 20
+Train: Loss=0.2575, Batch_id=97, Accuracy=93.16: 100%|██████████| 98/98 [00:20<00:00,  4.69it/s]
+Test set: Average loss: 0.0007,  Accuracy: 8961/10000  (89.61%)
+
+
+Epoch 21
+Train: Loss=0.2115, Batch_id=97, Accuracy=93.41: 100%|██████████| 98/98 [00:20<00:00,  4.71it/s]
+Test set: Average loss: 0.0008,  Accuracy: 8832/10000  (88.32%)
+
+
+Epoch 22
+Train: Loss=0.1986, Batch_id=97, Accuracy=93.64: 100%|██████████| 98/98 [00:22<00:00,  4.43it/s]
+Test set: Average loss: 0.0008,  Accuracy: 8867/10000  (88.67%)
+
+
+Epoch 23
+Train: Loss=0.2486, Batch_id=97, Accuracy=93.85: 100%|██████████| 98/98 [00:21<00:00,  4.57it/s]
+Test set: Average loss: 0.0008,  Accuracy: 8864/10000  (88.64%)
+
+
+Epoch 24
+Train: Loss=0.1808, Batch_id=97, Accuracy=94.56: 100%|██████████| 98/98 [00:21<00:00,  4.57it/s]
+Test set: Average loss: 0.0007,  Accuracy: 9006/10000  (90.06%)
+```
 
 <br>
 
 ## Test and Train Metrics
 
+![Alt text](../Files/Metrics.png)
+
 <br>
 
 ## Misclassified Images
+
+![Alt text](../Files/Misclassified.png)
 
 <br>
