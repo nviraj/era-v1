@@ -2,6 +2,29 @@
 
 import torch.nn as nn
 import torch.nn.functional as F
+import torchinfo
+
+
+def detailed_model_summary(model, input_size, device):
+    """Define a function to print the model summary."""
+
+    # https://github.com/TylerYep/torchinfo
+    torchinfo.summary(
+        model,
+        input_size=input_size,
+        batch_dim=0,
+        col_names=(
+            "input_size",
+            "kernel_size",
+            "output_size",
+            "num_params",
+            "trainable",
+            "mult_adds",
+        ),
+        device=device,
+        verbose=1,
+    )
+
 
 ############# Assignment 10 Model #############
 
