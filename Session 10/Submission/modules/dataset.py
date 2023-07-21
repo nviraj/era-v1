@@ -87,10 +87,19 @@ def apply_cifar_image_transformations(mean, std, cutout_size):
             # https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.HorizontalFlip
             A.HorizontalFlip(),
             # CutOut(8, 8)
-            # https://albumentations.ai/docs/api_reference/augmentations/dropout/cutout/#albumentations.augmentations.dropout.cutout.Cutout
-            # Because we normalized the images with mean and standard deviation from the whole dataset, the fill_value is set to the mean of the dataset
-            A.Cutout(
-                num_holes=1, max_h_size=cutout_size, max_w_size=cutout_size, p=1.0
+            # # https://albumentations.ai/docs/api_reference/augmentations/dropout/cutout/#albumentations.augmentations.dropout.cutout.Cutout
+            # # Because we normalized the images with mean and standard deviation from the whole dataset, the fill_value is set to the mean of the dataset
+            # A.Cutout(
+            #     num_holes=1, max_h_size=cutout_size, max_w_size=cutout_size, p=1.0
+            # ),
+            # https://albumentations.ai/docs/api_reference/augmentations/dropout/coarse_dropout/#coarsedropout-augmentation-augmentationsdropoutcoarse_dropout
+            A.CoarseDropout(
+                max_holes=1,
+                max_height=cutout_size,
+                max_width=cutout_size,
+                min_holes=1,
+                min_height=cutout_size,
+                min_width=cutout_size,
             ),
             # Convert the images to tensors
             # # transforms.ToTensor(),
