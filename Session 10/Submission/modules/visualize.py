@@ -54,16 +54,20 @@ def plot_train_test_metrics(results):
     test_losses = results["test_loss"]
     test_acc = results["test_acc"]
 
-    # Plot the graphs in a 2x2 grid showing the training and test metrics
-    fig, axs = plt.subplots(2, 2, figsize=(15, 10))
-    axs[0, 0].plot(train_losses)
-    axs[0, 0].set_title("Training Loss")
-    axs[1, 0].plot(train_acc)
-    axs[1, 0].set_title("Training Accuracy")
-    axs[0, 1].plot(test_losses)
-    axs[0, 1].set_title("Test Loss")
-    axs[1, 1].plot(test_acc)
-    axs[1, 1].set_title("Test Accuracy")
+    # Plot the graphs in a 1x2 grid showing the training and test metrics
+    fig, axs = plt.subplots(1, 2, figsize=(16, 8))
+
+    # Loss plot
+    axs[0].plot(train_losses, label="Train")
+    axs[0].plot(test_losses, label="Test")
+    axs[0].set_title("Loss")
+    axs[0].legend(loc="upper right")
+
+    # Accuracy plot
+    axs[1].plot(train_acc, label="Train")
+    axs[1].plot(test_acc, label="Test")
+    axs[1].set_title("Accuracy")
+    axs[1].legend(loc="upper right")
 
     return fig, axs
 
