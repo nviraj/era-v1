@@ -124,7 +124,7 @@ def split_cifar_data(data_path, train_transforms, test_transforms):
     """
     Function to download the MNIST data
     """
-    print("Downloading CIFAR10 dataset\n")
+    # print("Downloading CIFAR10 dataset\n")
     # Download MNIST dataset
     train_data = datasets.CIFAR10(data_path, train=True, download=True)
     test_data = datasets.CIFAR10(data_path, train=False, download=True)
@@ -139,7 +139,7 @@ def split_cifar_data(data_path, train_transforms, test_transforms):
     train_data = CIFAR10Transforms(train_data, train_transforms)
     test_data = CIFAR10Transforms(test_data, test_transforms)
 
-    print("Transformations applied on the dataset\n")
+    # print("Transformations applied on the dataset\n")
 
     return train_data, test_data
 
@@ -160,10 +160,10 @@ def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
         mean=CIFAR_MEAN, std=CIFAR_STD, cutout_size=CUTOUT_SIZE
     )
 
-    print(f"Train and test data path: {data_path}")
+    # print(f"Train and test data path: {data_path}")
 
     # Train and Test data
-    print("Splitting the dataset into train and test\n")
+    # print("Splitting the dataset into train and test\n")
     train_data, test_data = split_cifar_data(
         data_path, train_transforms, test_transforms
     )
@@ -181,7 +181,8 @@ def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
         worker_init_fn=_init_fn,
     )
 
-    print("Creating train and test dataloaders\n")
+    # print(f"Dataloader arguments: {dataloader_args}\n")
+    # print("Creating train and test dataloaders\n")
     # train dataloader
     train_loader = DataLoader(train_data, **dataloader_args)
 
