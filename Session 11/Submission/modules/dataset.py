@@ -181,7 +181,6 @@ def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
         worker_init_fn=_init_fn,
     )
 
-    print(f"Dataloader arguments: {dataloader_args}\n")
     print("Creating train and test dataloaders\n")
     # train dataloader
     train_loader = DataLoader(train_data, **dataloader_args)
