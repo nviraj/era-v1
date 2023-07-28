@@ -139,7 +139,7 @@ def split_cifar_data(data_path, train_transforms, test_transforms):
     train_data = CIFAR10Transforms(train_data, train_transforms)
     test_data = CIFAR10Transforms(test_data, test_transforms)
 
-    print("Transforms applied on the dataset\n")
+    print("Transformations applied on the dataset\n")
 
     return train_data, test_data
 
@@ -163,6 +163,7 @@ def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
     print(f"Train and test data path: {data_path}")
 
     # Train and Test data
+    print("Splitting the dataset into train and test\n")
     train_data, test_data = split_cifar_data(
         data_path, train_transforms, test_transforms
     )
@@ -180,6 +181,8 @@ def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
         worker_init_fn=_init_fn,
     )
 
+    print(f"Dataloader arguments: {dataloader_args}\n")
+    print("Creating train and test dataloaders\n")
     # train dataloader
     train_loader = DataLoader(train_data, **dataloader_args)
 

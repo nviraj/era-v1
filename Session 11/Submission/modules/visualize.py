@@ -106,7 +106,7 @@ def plot_misclassified_images(data, class_label, num_images=10):
 
 
 # Function to plot gradcam for misclassified images using pytorch_grad_cam
-def plot_gradcam(
+def plot_gradcam_images(
     model,
     data,
     class_label,
@@ -148,9 +148,9 @@ def plot_gradcam(
         # https://github.com/jacobgil/pytorch-grad-cam/blob/master/pytorch_grad_cam/utils/model_targets.py
         grad_cam_output = cam(
             input_tensor=image.unsqueeze(0),
-            targets=targets,
-            aug_smooth=True,
-            eigen_smooth=True,
+            targets=targets
+            # aug_smooth=True,
+            # eigen_smooth=True,
         )
         grad_cam_output = grad_cam_output[0, :]
 
