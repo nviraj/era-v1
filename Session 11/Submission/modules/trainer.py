@@ -3,10 +3,9 @@
 # from functools import partial
 
 import torch
+from modules.utils import get_correct_prediction_count, save_model
 from torch_lr_finder import LRFinder
 from tqdm import tqdm
-
-from modules.utils import get_correct_prediction_count, save_model
 
 # # # Reset tqdm
 # # tqdm._instances.clear()
@@ -67,7 +66,7 @@ def train_model(model, device, train_loader, optimizer, criterion):
     current_train_loss = train_loss / len(train_loader)
 
     print(
-        f"Training:\tAverage Loss: {current_train_loss:.5f}\t",
+        f"\nTraining:\tAverage Loss: {current_train_loss:.5f}\t",
         f"Accuracy: {current_train_accuracy:.2f}%",
     )
 
