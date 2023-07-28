@@ -3,8 +3,9 @@
 # from functools import partial
 
 import torch
-from modules.utils import get_correct_prediction_count, save_model
 from tqdm import tqdm
+
+from modules.utils import get_correct_prediction_count, save_model
 
 # # # Reset tqdm
 # # tqdm._instances.clear()
@@ -54,7 +55,7 @@ def train_model(model, device, train_loader, optimizer, criterion):
         processed += len(data)
 
         # Update the progress bar
-        msg = f"Train: Loss={loss.item():0.4f}, Batch_id={batch_idx}, Accuracy={100*correct/processed:0.2f}"
+        msg = f"Training: Batch = {batch_idx}, "
         pbar.set_description(desc=msg)
 
     # Close the progress bar
@@ -63,6 +64,11 @@ def train_model(model, device, train_loader, optimizer, criterion):
     # Return the final loss and accuracy for the epoch
     current_train_accuracy = 100 * correct / processed
     current_train_loss = train_loss / len(train_loader)
+
+    print(
+        f"Training:\tAverage Loss: {current_train_loss:.5f}, ",
+        f"Accuracy: {current_train_accuracy:.2f}%)",
+    )
 
     return current_train_accuracy, current_train_loss
 
@@ -127,9 +133,8 @@ def test_model(
 
     # Print the final test loss and accuracy
     print(
-        f"Test set: Average loss: {current_test_loss:.4f}, ",
-        f"Accuracy: {correct}/{len(test_loader.dataset)} ",
-        f"({current_test_accuracy:.2f}%)",
+        f"Testing:\tAverage Loss: {current_test_loss:.5f}, ",
+        f"Accuracy: {current_test_accuracy:.2f}%)",
     )
 
     # Return the final loss and accuracy for the epoch
