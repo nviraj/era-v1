@@ -83,9 +83,6 @@ def apply_cifar_image_transformations(mean, std, cutout_size):
             A.PadIfNeeded(min_height=36, min_width=36),
             # https://albumentations.ai/docs/api_reference/augmentations/crops/transforms/#albumentations.augmentations.crops.transforms.RandomCrop
             A.RandomCrop(32, 32),
-            # FlipLR
-            # https://albumentations.ai/docs/api_reference/augmentations/geometric/transforms/#albumentations.augmentations.geometric.transforms.HorizontalFlip
-            A.HorizontalFlip(),
             # CutOut(8, 8)
             # # https://albumentations.ai/docs/api_reference/augmentations/dropout/cutout/#albumentations.augmentations.dropout.cutout.Cutout
             # # Because we normalized the images with mean and standard deviation from the whole dataset, the fill_value is set to the mean of the dataset
