@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 
 
 def convert_back_image(image):
@@ -100,4 +103,53 @@ def plot_misclassified_images(data, class_label, num_images=10):
         plt.xticks([])
         plt.yticks([])
 
+    return fig, axs
+
+
+# Function to plot gradcam for misclassified images using pytorch_grad_cam
+def plot_gradcam(model, data, class_label, target_layers, device, num_images=10):
+    """Show gradcam for misclassified images"""
+
+    # Flag to enable cuda
+    if device == "cuda":
+        use_cuda = True
+    else:
+        use_cuda = False
+
+    # Calculate the number of images to plot
+    num_images = min(num_images, len(data["ground_truths"]))
+    # calculate the number of rows and columns to plot
+    num_cols = 5
+    num_rows = int(np.ceil(num_images / num_cols))
+
+    # Initialize a subplot with the required number of rows and columns
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(num_cols * 2, num_rows * 2))
+
+    # Initialize the GradCAM object
+    # https://github.com/jacobgil/pytorch-grad-cam/blob/master/pytorch_grad_cam/grad_cam.py
+    # https://github.com/jacobgil/pytorch-grad-cam/blob/master/pytorch_grad_cam/base_cam.py
+    cam = GradCAM(model=model, target_layers=target_layers, use_cuda=use_cuda)
+
+    # Iterate through the images and plot them in the grid along with class labels
+    for img_index in range(1, num_images + 1):
+        # Extract elements from the data dictionary
+        # Get the ground truth and predicted labels for the image
+        label = data["ground_truths"][img_index - 1].cpu().item()
+        pred = data["predicted_vals"][img_index - 1].cpu().item()
+        # Get the image
+        image = data["images"][img_index - 1].cpu()
+
+        # Get the GradCAM output
+        # https://github.com/jacobgil/pytorch-grad-cam/blob/master/pytorch_grad_cam/utils/model_targets.py
+        grayscale_cam = cam(input_tensor=image.unsqueeze(0), target_category=label)
+
+        # Plot the image
+        plt.subplot(num_rows, num_cols, img_index)
+        plt.tight_layout()
+        plt.axis("off")
+        plt.imshow(convert_back_image(image))
+        plt.imshow(grayscale_cam[0], alpha=0.5, cmap="jet")
+        plt.title(f"""ACT: {class_label[label]} \nPRED: {class_label[pred]}""")
+        plt.xticks([])
+        plt.yticks([])
     return fig, axs
