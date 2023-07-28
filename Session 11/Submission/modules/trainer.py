@@ -3,9 +3,10 @@
 # from functools import partial
 
 import torch
-from modules.utils import get_correct_prediction_count, save_model
 from torch_lr_finder import LRFinder
 from tqdm import tqdm
+
+from modules.utils import get_correct_prediction_count, save_model
 
 # # # Reset tqdm
 # # tqdm._instances.clear()
@@ -55,7 +56,7 @@ def train_model(model, device, train_loader, optimizer, criterion):
         processed += len(data)
 
         # Update the progress bar
-        msg = f"Progress: Batch = {batch_idx} "
+        msg = f"Progress:\tBatch = {batch_idx} "
         pbar.set_description(desc=msg)
 
     # Close the progress bar

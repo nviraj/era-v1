@@ -131,8 +131,8 @@ def split_cifar_data(data_path, train_transforms, test_transforms):
 
     # Calculate and print the mean and standard deviation of the dataset
     mean, std = calculate_mean_std(train_data)
-    print(f"\nMean: {mean}")
-    print(f"Std: {std}\n")
+    # print(f"\nMean: {mean}")
+    # print(f"Std: {std}")
 
     # Apply transforms on the dataset
     # Use the above class to apply transforms on the dataset using albumentations
