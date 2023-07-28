@@ -3,6 +3,7 @@
 # from functools import partial
 
 import torch
+from torch_lr_finder import LRFinder
 from tqdm import tqdm
 
 from modules.utils import get_correct_prediction_count, save_model
@@ -214,3 +215,23 @@ def train_and_test_model(
         print("\n")
 
     return results
+
+
+def find_optimal_lr(model, optimizer, criterion, train_loader, start_lr):
+    """Use LR Finder to find the best starting learning rate"""
+
+    # https://github.com/davidtvs/pytorch-lr-finder
+    # https://github.com/davidtvs/pytorch-lr-finder#notes
+    # https://github.com/davidtvs/pytorch-lr-finder/blob/master/torch_lr_finder/lr_finder.py
+
+    # Create LR finder object
+    lr_finder = LRFinder(model, optimizer, criterion)
+    lr_finder.range_test(
+        train_loader=train_loader, end_lr=10, num_iter=200, start_lr=1e-2
+    )
+    # https://github.com/davidtvs/pytorch-lr-finder/issues/88
+    _, suggested_lr = lr_finder.plot(suggest_lr=True)
+    lr_finder.reset()
+    # plot.figure.savefig("LRFinder - Suggested Max LR.png")
+
+    return suggested_lr
