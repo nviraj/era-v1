@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 
 
 def convert_back_image(image):
@@ -107,14 +106,20 @@ def plot_misclassified_images(data, class_label, num_images=10):
 
 
 # Function to plot gradcam for misclassified images using pytorch_grad_cam
-def plot_gradcam(model, data, class_label, target_layers, device, num_images=10):
+def plot_gradcam(
+    model,
+    data,
+    class_label,
+    target_layers,
+    device,
+    targets=None,
+    num_images=10,
+    image_weight=0.25,
+):
     """Show gradcam for misclassified images"""
 
     # Flag to enable cuda
-    if device == "cuda":
-        use_cuda = True
-    else:
-        use_cuda = False
+    use_cuda = device == "cuda"
 
     # Calculate the number of images to plot
     num_images = min(num_images, len(data["ground_truths"]))
@@ -141,14 +146,27 @@ def plot_gradcam(model, data, class_label, target_layers, device, num_images=10)
 
         # Get the GradCAM output
         # https://github.com/jacobgil/pytorch-grad-cam/blob/master/pytorch_grad_cam/utils/model_targets.py
-        grayscale_cam = cam(input_tensor=image.unsqueeze(0), target_category=label)
+        grad_cam_output = cam(
+            input_tensor=image.unsqueeze(0),
+            targets=targets,
+            aug_smooth=True,
+            eigen_smooth=True,
+        )
+        grad_cam_output = grad_cam_output[0, :]
+
+        # Overlay gradcam on top of numpy image
+        overlayed_image = show_cam_on_image(
+            convert_back_image(image),
+            grad_cam_output,
+            use_rgb=True,
+            image_weight=image_weight,
+        )
 
         # Plot the image
         plt.subplot(num_rows, num_cols, img_index)
         plt.tight_layout()
         plt.axis("off")
-        plt.imshow(convert_back_image(image))
-        plt.imshow(grayscale_cam[0], alpha=0.5, cmap="jet")
+        plt.imshow(overlayed_image)
         plt.title(f"""ACT: {class_label[label]} \nPRED: {class_label[pred]}""")
         plt.xticks([])
         plt.yticks([])
