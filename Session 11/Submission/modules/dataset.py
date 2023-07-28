@@ -139,7 +139,7 @@ def split_cifar_data(data_path, train_transforms, test_transforms):
     train_data = CIFAR10Transforms(train_data, train_transforms)
     test_data = CIFAR10Transforms(test_data, test_transforms)
 
-    # print("Transformations applied on the dataset\n")
+    # print("Transformations applied on the dataset")
 
     return train_data, test_data
 

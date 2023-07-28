@@ -3,10 +3,9 @@
 # from functools import partial
 
 import torch
+from modules.utils import get_correct_prediction_count, save_model
 from torch_lr_finder import LRFinder
 from tqdm import tqdm
-
-from modules.utils import get_correct_prediction_count, save_model
 
 # # # Reset tqdm
 # # tqdm._instances.clear()
@@ -66,10 +65,7 @@ def train_model(model, device, train_loader, optimizer, criterion):
     current_train_accuracy = 100 * correct / processed
     current_train_loss = train_loss / len(train_loader)
 
-    print(
-        f"\nTraining:\tAverage Loss: {current_train_loss:.5f}\t",
-        f"Accuracy: {current_train_accuracy:.2f}%",
-    )
+    print(f"Training:\tAverage Loss: {current_train_loss:.5f}\tAccuracy: {current_train_accuracy:.2f}%")
 
     return current_train_accuracy, current_train_loss
 
@@ -115,12 +111,8 @@ def test_model(
             if save_incorrect_predictions:
                 # Store images incorrectly predicted, generated predictions and the actual value
                 misclassified_image_data["images"].extend(data[incorrect_indices])
-                misclassified_image_data["ground_truths"].extend(
-                    target[incorrect_indices]
-                )
-                misclassified_image_data["predicted_vals"].extend(
-                    pred[incorrect_indices]
-                )
+                misclassified_image_data["ground_truths"].extend(target[incorrect_indices])
+                misclassified_image_data["predicted_vals"].extend(pred[incorrect_indices])
 
             # Get the count of correct predictions
             correct += get_correct_prediction_count(output, target)
@@ -134,8 +126,7 @@ def test_model(
 
     # Print the final test loss and accuracy
     print(
-        f"Testing:\tAverage Loss: {current_test_loss:.5f}\t",
-        f"Accuracy: {current_test_accuracy:.2f}%",
+        f"Testing:\tAverage Loss: {current_test_loss:.5f}\tAccuracy: {current_test_accuracy:.2f}%",
     )
 
     # Return the final loss and accuracy for the epoch
@@ -167,9 +158,7 @@ def train_and_test_model(
         print(f"Epoch {epoch}")
 
         # Train the model
-        epoch_train_accuracy, epoch_train_loss = train_model(
-            model, device, train_loader, optimizer, criterion
-        )
+        epoch_train_accuracy, epoch_train_loss = train_model(model, device, train_loader, optimizer, criterion)
 
         # Should we save the incorrect predictions for this epoch?
         # Do this only for the last epoch, if not you will run out of memory
@@ -217,7 +206,7 @@ def train_and_test_model(
     return results
 
 
-def find_optimal_lr(model, optimizer, criterion, train_loader, start_lr):
+def find_optimal_lr(model, optimizer, criterion, train_loader):
     """Use LR Finder to find the best starting learning rate"""
 
     # https://github.com/davidtvs/pytorch-lr-finder
@@ -226,9 +215,7 @@ def find_optimal_lr(model, optimizer, criterion, train_loader, start_lr):
 
     # Create LR finder object
     lr_finder = LRFinder(model, optimizer, criterion)
-    lr_finder.range_test(
-        train_loader=train_loader, end_lr=10, num_iter=200, start_lr=1e-2
-    )
+    lr_finder.range_test(train_loader=train_loader, end_lr=10, num_iter=100)
     # https://github.com/davidtvs/pytorch-lr-finder/issues/88
     _, suggested_lr = lr_finder.plot(suggest_lr=True)
     lr_finder.reset()
