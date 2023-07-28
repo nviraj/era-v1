@@ -55,6 +55,9 @@ class BasicBlock(nn.Module):
 class ResNet(nn.Module):
     """ResNet model"""
 
+    # Class variable to print shape
+    print_shape = False
+
     def __init__(self, block, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
         self.in_planes = 64
@@ -76,16 +79,48 @@ class ResNet(nn.Module):
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
 
+    def print_view(self, x, msg=""):
+        """Print shape of the model"""
+        if self.print_shape:
+            if msg != "":
+                print(msg, "\n\t", x.shape, "\n")
+            else:
+                print(x.shape)
+
     def forward(self, x):
         """Forward pass"""
+
+        # Input layer
         out = F.relu(self.bn1(self.conv1(x)))
+        self.print_view(out, "PrepLayer")
+
+        # Layer 1
         out = self.layer1(out)
+        self.print_view(out, "Layer 1")
+
+        # Layer 2
         out = self.layer2(out)
+        self.print_view(out, "Layer 2")
+
+        # Layer 3
         out = self.layer3(out)
+        self.print_view(out, "Layer 3")
+
+        # Layer 4
         out = self.layer4(out)
+        self.print_view(out, "Layer 4")
+
+        # GAP layer
         out = F.avg_pool2d(out, 4)
+        self.print_view(out, "Post GAP")
+
+        # Reshape before FC such that it becomes 1D
         out = out.view(out.size(0), -1)
+        self.print_view(out, "Reshape before FC")
+
+        # FC Layer
         out = self.linear(out)
+        self.print_view(out, "After FC")
         return out
 
 
