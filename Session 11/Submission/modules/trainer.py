@@ -56,7 +56,7 @@ def train_model(model, device, train_loader, optimizer, criterion):
         processed += len(data)
 
         # Update the progress bar
-        msg = f"Training: Batch = {batch_idx}, "
+        msg = f"Progress: Batch = {batch_idx} "
         pbar.set_description(desc=msg)
 
     # Close the progress bar
@@ -67,8 +67,8 @@ def train_model(model, device, train_loader, optimizer, criterion):
     current_train_loss = train_loss / len(train_loader)
 
     print(
-        f"Training:\tAverage Loss: {current_train_loss:.5f}, ",
-        f"Accuracy: {current_train_accuracy:.2f}%)",
+        f"Training:\tAverage Loss: {current_train_loss:.5f}\t",
+        f"Accuracy: {current_train_accuracy:.2f}%",
     )
 
     return current_train_accuracy, current_train_loss
@@ -134,8 +134,8 @@ def test_model(
 
     # Print the final test loss and accuracy
     print(
-        f"Testing:\tAverage Loss: {current_test_loss:.5f}, ",
-        f"Accuracy: {current_test_accuracy:.2f}%)",
+        f"Testing:\tAverage Loss: {current_test_loss:.5f}\t",
+        f"Accuracy: {current_test_accuracy:.2f}%",
     )
 
     # Return the final loss and accuracy for the epoch
