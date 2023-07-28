@@ -1,4 +1,6 @@
 """Module to define utility functions for the project."""
+import os
+
 import torch
 
 
@@ -18,6 +20,18 @@ def get_device():
 
     # pylint: disable=E1101
     return final_choice, torch.device(final_choice)
+
+
+def get_num_workers(model_run_location):
+    """Given a run mode, return the number of workers to be used for data loading."""
+
+    # calculate the number of workers
+    num_workers = (os.cpu_count() - 1) if os.cpu_count() > 3 else 2
+
+    # If run_mode is local, use only 2 workers
+    num_workers = num_workers if model_run_location == "colab" else 0
+
+    return num_workers
 
 
 def get_correct_prediction_count(prediction, label):
