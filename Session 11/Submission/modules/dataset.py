@@ -6,12 +6,13 @@ import albumentations as A
 # import cv2
 import numpy as np
 from albumentations.pytorch.transforms import ToTensorV2
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets
 
 # Use precomputed values for mean and standard deviation of the dataset
 CIFAR_MEAN = (0.4915, 0.4823, 0.4468)
 CIFAR_STD = (0.2470, 0.2435, 0.2616)
+CUTOUT_SIZE = 16
 
 # Create class labels and convert to tuple
 CIFAR_CLASSES = tuple(
@@ -149,3 +150,40 @@ def calculate_mean_std(dataset):
     mean = np.mean(data, axis=(0, 1, 2))
     std = np.std(data, axis=(0, 1, 2))
     return mean, std
+
+
+def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
+    """Get the final train and test data loaders"""
+
+    ## Data Transformations
+    train_transforms, test_transforms = apply_cifar_image_transformations(
+        mean=CIFAR_MEAN, std=CIFAR_STD, cutout_size=CUTOUT_SIZE
+    )
+
+    print(f"Train and test data path: {data_path}")
+
+    # Train and Test data
+    train_data, test_data = split_cifar_data(
+        data_path, train_transforms, test_transforms
+    )
+
+    # To be passed to dataloader
+    def _init_fn(worker_id):
+        np.random.seed(int(seed))
+
+    # dataloader arguments - something you'll fetch these from cmdprmt
+    dataloader_args = dict(
+        shuffle=True,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=True,
+        worker_init_fn=_init_fn,
+    )
+
+    # train dataloader
+    train_loader = DataLoader(train_data, **dataloader_args)
+
+    # test dataloader
+    test_loader = DataLoader(test_data, **dataloader_args)
+
+    return train_loader, test_loader
