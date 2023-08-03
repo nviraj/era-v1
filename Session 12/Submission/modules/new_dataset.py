@@ -7,12 +7,12 @@ import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from albumentations.pytorch.transforms import ToTensorV2
+from pytorch_lightning.utilities.seed import seed_everything
 from torch.utils.data import DataLoader, random_split
 
 # Use precomputed values for mean and standard deviation of the dataset
 CIFAR_MEAN = (0.4915, 0.4823, 0.4468)
 CIFAR_STD = (0.2470, 0.2435, 0.2616)
-CUTOUT_SIZE = 16
 
 # Create class labels and convert to tuple
 CIFAR_CLASSES = tuple(
@@ -33,6 +33,9 @@ CIFAR_CLASSES = tuple(
 
 
 class CIFARDataModule(pl.LightningDataModule):
+    """Lightning DataModule for CIFAR10 dataset"""
+
+    # Class attributes
     mean = CIFAR_MEAN
     std = CIFAR_STD
     num_classes = 10
@@ -42,60 +45,60 @@ class CIFARDataModule(pl.LightningDataModule):
     padding = 4
     cutout_size = 8
 
-    def __init__(self, data_path, batch_size, num_workers, seed, self.cutout_size=16):
+    def __init__(self, data_path, batch_size, num_workers, seed):
         super().__init__()
         self.data_path = data_path
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.seed = seed
-        self.self.cutout_size = self.cutout_size
         self.cifar_train = None
         self.cifar_val = None
         self.cifar_test = None
+        self.dataloader_dict = dict(
+            shuffle=True,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            pin_memory=True,
+            worker_init_fn=self._init_fn,
+        )
 
+    # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#prepare-data
     def prepare_data(self):
         # Download the CIFAR10 dataset if it doesn't exist
         datasets.CIFAR10(self.data_path, train=True, download=True)
         datasets.CIFAR10(self.data_path, train=False, download=True)
 
+    # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#setup
     def setup(self, stage=None):
         # Define the data transformations
         train_transforms, test_transforms = self.apply_cifar_image_transformations()
 
         # Load the CIFAR10 dataset
-        cifar_full = datasets.CIFAR10(self.data_path, train=True, transform=train_transforms)
-        self.cifar_train, self.cifar_val = random_split(cifar_full, [45000, 5000])
-        self.cifar_test = datasets.CIFAR10(self.data_path, train=False, transform=test_transforms)
+        self.cifar_train = datasets.CIFAR10(self.data_path, train=True, transform=train_transforms)
+        self.cifar_val = datasets.CIFAR10(self.data_path, train=False, transform=test_transforms)
+        self.cifar_test = self.cifar_val
 
+    # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#train-dataloader
     def train_dataloader(self):
         return DataLoader(
             self.cifar_train,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            shuffle=True,
+            **self.dataloader_dict,
         )
 
+    # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#val-dataloader
     def val_dataloader(self):
         return DataLoader(
             self.cifar_val,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            shuffle=False,
+            **self.dataloader_dict,
         )
 
+    # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#test-dataloader
     def test_dataloader(self):
-        return DataLoader(
-            self.cifar_test,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            shuffle=False,
-        )
+        return self.val_dataloader()
 
     def apply_cifar_image_transformations(self):
-        # Apply the required transformations to the MNIST dataset
+        """Function to apply the required transformations to the CIFAR10 dataset."""
+        # Apply the required transformations to the CIFAR10 dataset
         train_transforms = A.Compose(
             [
                 # normalize the images with mean and standard deviation from the whole dataset
@@ -136,3 +139,6 @@ class CIFARDataModule(pl.LightningDataModule):
         )
 
         return train_transforms, test_transforms
+
+    def _init_fn(self, worker_id):
+        seed_everything(int(self.seed) + worker_id)
