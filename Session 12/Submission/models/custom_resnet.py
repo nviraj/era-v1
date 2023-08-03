@@ -2,6 +2,7 @@
 
 # Resources
 # https://lightning.ai/docs/pytorch/stable/starter/introduction.html
+# https://lightning.ai/docs/pytorch/stable/starter/converting.html
 
 import lightning.pytorch as pl
 import torch
@@ -234,6 +235,7 @@ class CustomResNet(pl.LightningModule):
 
         # Softmax
         return F.log_softmax(x, dim=-1)
+
     # optimiser function
     def configure_optimizers(self):
         """Add ADAM optimizer to the lightning module"""
@@ -264,15 +266,11 @@ class CustomResNet(pl.LightningModule):
         # Calculate accuracy
         acc = accuracy(prediction, target)
 
-        return acc
+        return acc * 100
 
     # Function to compute loss and accuracy for both training and validation
     def compute_metrics(self, batch):
         """Function to calculate loss and accuracy"""
-
-        # Define accuracy
-        # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
-        accuracy = Accuracy(task="multiclass", num_classes=10)
 
         # Get data and target from batch
         data, target = batch
@@ -287,3 +285,27 @@ class CustomResNet(pl.LightningModule):
         acc = self.accuracy_function(prediction=pred, target=target)
 
         return loss, acc
+
+    # training function
+    def training_step(self, batch, batch_idx):
+        """Training step"""
+
+        # Compute loss and accuracy
+        loss, acc = self.compute_metrics(batch)
+
+        self.log("train_loss", loss)
+        self.log("train_acc", acc)
+        # Return training loss
+        return loss
+
+    # validation function
+    def validation_step(self, batch, batch_idx):
+        """Validation step"""
+
+        # Compute loss and accuracy
+        loss, acc = self.compute_metrics(batch)
+
+        self.log("val_loss", loss)
+        self.log("val_acc", acc)
+        # Return validation loss
+        return loss
