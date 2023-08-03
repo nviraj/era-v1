@@ -239,3 +239,51 @@ class CustomResNet(pl.LightningModule):
         """Add ADAM optimizer to the lightning module"""
         optimizer = optim.Adam(self.parameters(), lr=PREFERRED_START_LR, weight_decay=PREFERRED_WEIGHT_DECAY)
         return optimizer
+
+    # Define loss function
+    def loss_function(self, prediction, target):
+        """Define loss function"""
+
+        # Define criterion
+        # https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
+        loss = torch.nn.CrossEntropyLoss()
+
+        # Calculate loss
+        loss = loss(prediction, target)
+
+        return loss
+
+    # Define accuracy function
+    def accuracy_function(self, prediction, target):
+        """Define accuracy function"""
+
+        # Define accuracy
+        # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
+        accuracy = Accuracy(task="multiclass", num_classes=10)
+
+        # Calculate accuracy
+        acc = accuracy(prediction, target)
+
+        return acc
+
+    # Function to compute loss and accuracy for both training and validation
+    def compute_metrics(self, batch):
+        """Function to calculate loss and accuracy"""
+
+        # Define accuracy
+        # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
+        accuracy = Accuracy(task="multiclass", num_classes=10)
+
+        # Get data and target from batch
+        data, target = batch
+
+        # Generate predictions using model
+        pred = self.forward(data)
+
+        # Calculate loss for the batch
+        loss = self.loss_function(prediction=pred, target=target)
+
+        # Calculate accuracy for the batch
+        acc = self.accuracy_function(prediction=pred, target=target)
+
+        return loss, acc
