@@ -309,3 +309,9 @@ class CustomResNet(pl.LightningModule):
         self.log("val_acc", acc)
         # Return validation loss
         return loss
+
+    # test function will just use validation step
+    def test_step(self, batch, batch_idx):
+        """Test step"""
+        # Here we just reuse the validation_step for testing
+        return self.validation_step(batch, batch_idx)
