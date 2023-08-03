@@ -54,14 +54,10 @@ class CIFAR10Transforms(Dataset):
         return len(self.dataset)
 
     def __repr__(self):
-        return (
-            f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
-        )
+        return f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
 
     def __str__(self):
-        return (
-            f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
-        )
+        return f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
 
 
 def apply_cifar_image_transformations(mean, std, cutout_size):
@@ -164,9 +160,7 @@ def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
 
     # Train and Test data
     # print("Splitting the dataset into train and test\n")
-    train_data, test_data = split_cifar_data(
-        data_path, train_transforms, test_transforms
-    )
+    train_data, test_data = split_cifar_data(data_path, train_transforms, test_transforms)
 
     # To be passed to dataloader
     def _init_fn(worker_id):
