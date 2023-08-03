@@ -4,10 +4,16 @@
 # https://lightning.ai/docs/pytorch/stable/starter/introduction.html
 
 import lightning.pytorch as pl
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 import torchinfo
 from torchmetrics import Accuracy
+
+# What is the start LR and weight decay you'd prefer?
+PREFERRED_START_LR = 3e-2
+PREFERRED_WEIGHT_DECAY = 1e-5
 
 
 def detailed_model_summary(model, input_size, device):
@@ -228,3 +234,8 @@ class CustomResNet(pl.LightningModule):
 
         # Softmax
         return F.log_softmax(x, dim=-1)
+    # optimiser function
+    def configure_optimizers(self):
+        """Add ADAM optimizer to the lightning module"""
+        optimizer = optim.Adam(self.parameters(), lr=PREFERRED_START_LR, weight_decay=PREFERRED_WEIGHT_DECAY)
+        return optimizer
