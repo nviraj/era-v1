@@ -1,3 +1,4 @@
+"""This file contains functions to download and transform the CIFAR10 dataset"""
 # Needed for image transformations
 import albumentations as A
 import numpy as np
@@ -72,7 +73,6 @@ class CIFARDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             pin_memory=True,
-            worker_init_fn=self._init_fn,
             shuffle=True,
         )
 
@@ -82,7 +82,6 @@ class CIFARDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             pin_memory=True,
-            worker_init_fn=self._init_fn,
             shuffle=False,
         )
 
@@ -92,7 +91,6 @@ class CIFARDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             pin_memory=True,
-            worker_init_fn=self._init_fn,
             shuffle=False,
         )
 
@@ -138,7 +136,3 @@ class CIFARDataModule(pl.LightningDataModule):
         )
 
         return train_transforms, test_transforms
-
-    def _init_fn(self, worker_id):
-        np.random.seed(int(self.seed) + worker_id)
-        torch.manual_seed(int(self.seed) + worker_id)
