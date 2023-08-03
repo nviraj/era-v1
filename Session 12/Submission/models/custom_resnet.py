@@ -1,8 +1,13 @@
 """Module to define the model."""
 
+# Resources
+# https://lightning.ai/docs/pytorch/stable/starter/introduction.html
+
+import lightning.pytorch as pl
 import torch.nn as nn
 import torch.nn.functional as F
 import torchinfo
+from torchmetrics import Accuracy
 
 
 def detailed_model_summary(model, input_size, device):
@@ -26,11 +31,12 @@ def detailed_model_summary(model, input_size, device):
     )
 
 
-############# Assignment 10 Model #############
+############# Assignment 12 Model #############
 
 
-# This is for Assignment 10
-class CustomResNet(nn.Module):
+# This is for Assignment 12
+# Model used from Assignment 10 and converted to lightning model
+class CustomResNet(pl.LightningModule):
     """This defines the structure of the NN."""
 
     # Class variable to print shape
