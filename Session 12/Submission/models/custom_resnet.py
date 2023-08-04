@@ -20,7 +20,7 @@ PREFERRED_START_LR = 3e-2
 PREFERRED_WEIGHT_DECAY = 1e-5
 
 
-def detailed_model_summary(model, input_size, device):
+def detailed_model_summary(model, input_size):
     """Define a function to print the model summary."""
 
     # https://github.com/TylerYep/torchinfo
@@ -35,7 +35,7 @@ def detailed_model_summary(model, input_size, device):
             "num_params",
             "trainable",
         ),
-        device=device,
+        # device=device,
         verbose=1,
         col_width=16,
     )
@@ -282,7 +282,7 @@ class CustomResNet(pl.LightningModule):
         # https://lightning.ai/docs/pytorch/stable/common/optimization.html#total-stepping-batches
         scheduler_dict = {
             "scheduler": OneCycleLR(
-                optimizer,
+                optimizer=optimizer,
                 max_lr=suggested_lr,
                 total_steps=int(self.trainer.estimated_stepping_batches),
                 pct_start=(5 / int(self.trainer.max_epochs)),
