@@ -216,9 +216,8 @@ def train_and_test_model(
     batch_size,
     num_epochs,
     model,
-    train_loader,
-    test_loader,
-    val_loader,
+    datamodule,
+    logger,
     misclassified_image_data,
     debug=False,
 ):
@@ -247,14 +246,16 @@ def train_and_test_model(
     # https://lightning.ai/docs/pytorch/stable/common/trainer.html#methods
     trainer = pl.Trainer(
         precision="bf16-mixed",
-        logger=True,
         fast_dev_run=fast_dev_run,
         devices="auto",
         accelerator="auto",
         max_epochs=num_epochs,
+        logger=logger,
         overfit_batches=overfit_batches,
         profiler=profiler,
         callbacks=[checkpoint, lr_rate_monitor],
     )
 
-    trainer.fit(model, train_loader, val_loader)
+    trainer.fit(model, datamodule=datamodule)
+    trainer.test(model, datamodule=datamodule)
+    return trainer
