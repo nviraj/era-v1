@@ -198,6 +198,9 @@ class CustomResNet(pl.LightningModule):
         # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
         self.accuracy_function = Accuracy(task="multiclass", num_classes=10)
 
+        # Get lr finder values
+        self.lr_finder = self.find_optimal_lr()
+
     def print_view(self, x, msg=""):
         """Print shape of the model"""
         if self.print_shape:
@@ -247,22 +250,28 @@ class CustomResNet(pl.LightningModule):
         # Softmax
         return F.log_softmax(x, dim=-1)
 
-    def find_optimal_lr(self, optimizer, criterion, train_loader):
+    def find_optimal_lr(self):
         """Use LR Finder to find the best starting learning rate"""
 
         # https://github.com/davidtvs/pytorch-lr-finder
         # https://github.com/davidtvs/pytorch-lr-finder#notes
         # https://github.com/davidtvs/pytorch-lr-finder/blob/master/torch_lr_finder/lr_finder.py
 
+        # New optimizer with default LR
+        tmp_optimizer = optim.Adam(self.parameters(), lr=PREFERRED_START_LR, weight_decay=PREFERRED_WEIGHT_DECAY)
+
         # Create LR finder object
-        lr_finder = LRFinder(self, optimizer, criterion)
-        lr_finder.range_test(train_loader=train_loader, end_lr=10, num_iter=100)
+        lr_finder = LRFinder(self, optimizer=tmp_optimizer, criterion=self.loss_function)
+        lr_finder.range_test(train_loader=self.trainer.train_dataloader, end_lr=10, num_iter=100)
         # https://github.com/davidtvs/pytorch-lr-finder/issues/88
         _, suggested_lr = lr_finder.plot(suggest_lr=True)
         lr_finder.reset()
         # plot.figure.savefig("LRFinder - Suggested Max LR.png")
 
         print(f"Suggested Max LR: {suggested_lr}")
+
+        if suggested_lr is None:
+            suggested_lr = PREFERRED_START_LR
 
         return suggested_lr
 
@@ -271,19 +280,11 @@ class CustomResNet(pl.LightningModule):
         """Add ADAM optimizer to the lightning module"""
         optimizer = optim.Adam(self.parameters(), lr=PREFERRED_START_LR, weight_decay=PREFERRED_WEIGHT_DECAY)
 
-        # # Find optimal LR to start with
-        suggested_lr = self.find_optimal_lr(
-            optimizer=optimizer, criterion=self.loss_function, train_loader=self.trainer.train_dataloader
-        )
-
-        if suggested_lr is None:
-            suggested_lr = PREFERRED_START_LR
-
         # https://lightning.ai/docs/pytorch/stable/common/optimization.html#total-stepping-batches
         scheduler_dict = {
             "scheduler": OneCycleLR(
                 optimizer=optimizer,
-                max_lr=suggested_lr,
+                max_lr=self.lr_finder,
                 total_steps=int(self.trainer.estimated_stepping_batches),
                 pct_start=(5 / int(self.trainer.max_epochs)),
                 div_factor=100,
