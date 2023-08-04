@@ -38,8 +38,8 @@ class CIFAR10Transforms(Dataset):
     # Given a dataset and transformations,
     # apply the transformations and return the dataset
     def __init__(self, dataset, transforms):
-        self.transforms = transforms
         self.dataset = dataset
+        self.transforms = transforms
 
     def __getitem__(self, idx):
         # Get the image and label from the dataset
@@ -60,7 +60,7 @@ class CIFAR10Transforms(Dataset):
         return f"CIFAR10Transforms(dataset={self.dataset}, transforms={self.transforms})"
 
 
-def apply_cifar_image_transformations(mean, std, cutout_size):
+def apply_cifar_image_transformations(mean=CIFAR_MEAN, std=CIFAR_STD, cutout_size=CUTOUT_SIZE):
     """
     Function to apply the required transformations to the MNIST dataset.
     """
