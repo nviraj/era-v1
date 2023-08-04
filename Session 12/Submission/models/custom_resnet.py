@@ -3,13 +3,16 @@
 # Resources
 # https://lightning.ai/docs/pytorch/stable/starter/introduction.html
 # https://lightning.ai/docs/pytorch/stable/starter/converting.html
+# https://lightning.ai/docs/pytorch/stable/notebooks/lightning_examples/cifar10-baseline.html
 
-import lightning.pytorch as pl
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchinfo
+from torch.optim.lr_scheduler import OneCycleLR
+from torch_lr_finder import LRFinder
 from torchmetrics import Accuracy
 
 # What is the start LR and weight decay you'd prefer?
@@ -187,6 +190,14 @@ class CustomResNet(pl.LightningModule):
         # FC Layer
         self.fc = nn.Linear(512, 10)
 
+        # Define loss function
+        # https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
+        self.loss_function = torch.nn.CrossEntropyLoss()
+
+        # Define accuracy function
+        # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
+        self.accuracy_function = Accuracy(task="multiclass", num_classes=10)
+
     def print_view(self, x, msg=""):
         """Print shape of the model"""
         if self.print_shape:
@@ -236,35 +247,71 @@ class CustomResNet(pl.LightningModule):
         # Softmax
         return F.log_softmax(x, dim=-1)
 
+    def find_optimal_lr(self, optimizer, criterion, train_loader):
+        """Use LR Finder to find the best starting learning rate"""
+
+        # https://github.com/davidtvs/pytorch-lr-finder
+        # https://github.com/davidtvs/pytorch-lr-finder#notes
+        # https://github.com/davidtvs/pytorch-lr-finder/blob/master/torch_lr_finder/lr_finder.py
+
+        # Create LR finder object
+        lr_finder = LRFinder(self, optimizer, criterion)
+        lr_finder.range_test(train_loader=train_loader, end_lr=10, num_iter=100)
+        # https://github.com/davidtvs/pytorch-lr-finder/issues/88
+        _, suggested_lr = lr_finder.plot(suggest_lr=True)
+        lr_finder.reset()
+        # plot.figure.savefig("LRFinder - Suggested Max LR.png")
+
+        print(f"Suggested Max LR: {suggested_lr}")
+
+        return suggested_lr
+
     # optimiser function
     def configure_optimizers(self):
         """Add ADAM optimizer to the lightning module"""
         optimizer = optim.Adam(self.parameters(), lr=PREFERRED_START_LR, weight_decay=PREFERRED_WEIGHT_DECAY)
-        return optimizer
+
+        # # Find optimal LR to start with
+        suggested_lr = self.find_optimal_lr(
+            optimizer=optimizer, criterion=self.loss_function, train_loader=self.trainer.train_dataloader
+        )
+
+        if suggested_lr is None:
+            suggested_lr = PREFERRED_START_LR
+
+        # https://lightning.ai/docs/pytorch/stable/common/optimization.html#total-stepping-batches
+        scheduler_dict = {
+            "scheduler": OneCycleLR(
+                optimizer,
+                max_lr=suggested_lr,
+                total_steps=int(self.trainer.estimated_stepping_batches),
+                pct_start=(5 / int(self.trainer.max_epochs)),
+                div_factor=100,
+                three_phase=False,
+                anneal_strategy="linear",
+                final_div_factor=100,
+                verbose=False,
+            ),
+            "interval": "step",
+        }
+
+        return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
 
     # Define loss function
-    def loss_function(self, prediction, target):
-        """Define loss function"""
-
-        # Define criterion
-        # https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
-        loss = torch.nn.CrossEntropyLoss()
+    def compute_loss(self, prediction, target):
+        """Compute Loss"""
 
         # Calculate loss
-        loss = loss(prediction, target)
+        loss = self.loss_function(prediction, target)
 
         return loss
 
     # Define accuracy function
-    def accuracy_function(self, prediction, target):
-        """Define accuracy function"""
-
-        # Define accuracy
-        # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
-        accuracy = Accuracy(task="multiclass", num_classes=10)
+    def compute_accuracy(self, prediction, target):
+        """Compute accuracy"""
 
         # Calculate accuracy
-        acc = accuracy(prediction, target)
+        acc = self.accuracy_function(prediction, target)
 
         return acc * 100
 
@@ -279,10 +326,10 @@ class CustomResNet(pl.LightningModule):
         pred = self.forward(data)
 
         # Calculate loss for the batch
-        loss = self.loss_function(prediction=pred, target=target)
+        loss = self.compute_loss(prediction=pred, target=target)
 
         # Calculate accuracy for the batch
-        acc = self.accuracy_function(prediction=pred, target=target)
+        acc = self.compute_accuracy(prediction=pred, target=target)
 
         return loss, acc
 
@@ -293,7 +340,7 @@ class CustomResNet(pl.LightningModule):
         # Compute loss and accuracy
         loss, acc = self.compute_metrics(batch)
 
-        self.log("train_loss", loss)
+        self.log("train_loss", loss, prog_bar=True)
         self.log("train_acc", acc)
         # Return training loss
         return loss
@@ -305,7 +352,7 @@ class CustomResNet(pl.LightningModule):
         # Compute loss and accuracy
         loss, acc = self.compute_metrics(batch)
 
-        self.log("val_loss", loss)
+        self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", acc)
         # Return validation loss
         return loss
