@@ -5,8 +5,12 @@
 import pytorch_lightning as pl
 import torch
 from modules.utils import get_correct_prediction_count, save_model
-from torch_lr_finder import LRFinder
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from tqdm import tqdm
+
+# Define all the required pytorch lightning callbacks
+lr_monitor = LearningRateMonitor(logging_interval="step")
+
 
 ############# Train and Test Functions #############
 
@@ -214,8 +218,9 @@ def train_and_test_model(
     model,
     train_loader,
     test_loader,
-    scheduler,
+    val_loader,
     misclassified_image_data,
+    debug=False,
 ):
     """Trains and tests the model by iterating through epochs"""
 
@@ -224,73 +229,32 @@ def train_and_test_model(
     # Hold the results for every epoch
     results = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
 
-    # Run the model for NUM_EPOCHS
-    for epoch in range(1, num_epochs + 1):
-        # Print the current epoch
-        print(f"Epoch {epoch}")
+    # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelCheckpoint.html#modelcheckpoint
+    checkpoint = ModelCheckpoint(monitor="val_acc", mode="max", filename="model_best_epoch", save_last=True)
+    lr_rate_monitor = LearningRateMonitor(logging_interval="epoch")
 
-        # Train the model
-        epoch_train_accuracy, epoch_train_loss = train_model(model, device, train_loader, optimizer, criterion)
+    # Change trainer settings for debugging
+    if debug:
+        num_epochs = 1
+        fast_dev_run = True
+        overfit_batches = 0.1
+        profiler = "simple"
+    else:
+        fast_dev_run = False
+        overfit_batches = 0.0
+        profiler = None
 
-        # Should we save the incorrect predictions for this epoch?
-        # Do this only for the last epoch, if not you will run out of memory
-        if epoch == num_epochs:
-            save_incorrect_predictions = True
-        else:
-            save_incorrect_predictions = False
+    # https://lightning.ai/docs/pytorch/stable/common/trainer.html#methods
+    trainer = pl.Trainer(
+        precision="bf16-mixed",
+        logger=True,
+        fast_dev_run=fast_dev_run,
+        devices="auto",
+        accelerator="auto",
+        max_epochs=num_epochs,
+        overfit_batches=overfit_batches,
+        profiler=profiler,
+        callbacks=[checkpoint, lr_rate_monitor],
+    )
 
-        # Test the model
-        epoch_test_accuracy, epoch_test_loss = test_model(
-            model,
-            device,
-            test_loader,
-            criterion,
-            misclassified_image_data,
-            save_incorrect_predictions,
-        )
-
-        # Append the train and test accuracies and losses
-        results["train_loss"].append(epoch_train_loss)
-        results["train_acc"].append(epoch_train_accuracy)
-        results["test_loss"].append(epoch_test_loss)
-        results["test_acc"].append(epoch_test_accuracy)
-
-        # Check if the accuracy is the best accuracy till now
-        # Save the model if you get the best test accuracy
-        if max(results["test_acc"]) == epoch_test_accuracy:
-            # print("Saving the model as best test accuracy till now is achieved!")
-            save_model(
-                epoch,
-                model,
-                optimizer,
-                scheduler,
-                batch_size,
-                criterion,
-                file_name="model_best_epoch.pth",
-            )
-
-        # # Passing the latest test loss in list to scheduler to adjust learning rate
-        # scheduler.step(test_losses[-1])
-        scheduler.step()
-        # # # Line break before next epoch
-        print("\n")
-
-    return results
-
-
-def find_optimal_lr(model, optimizer, criterion, train_loader):
-    """Use LR Finder to find the best starting learning rate"""
-
-    # https://github.com/davidtvs/pytorch-lr-finder
-    # https://github.com/davidtvs/pytorch-lr-finder#notes
-    # https://github.com/davidtvs/pytorch-lr-finder/blob/master/torch_lr_finder/lr_finder.py
-
-    # Create LR finder object
-    lr_finder = LRFinder(model, optimizer, criterion)
-    lr_finder.range_test(train_loader=train_loader, end_lr=10, num_iter=100)
-    # https://github.com/davidtvs/pytorch-lr-finder/issues/88
-    _, suggested_lr = lr_finder.plot(suggest_lr=True)
-    lr_finder.reset()
-    # plot.figure.savefig("LRFinder - Suggested Max LR.png")
-
-    return suggested_lr
+    trainer.fit(model, train_loader, val_loader)
