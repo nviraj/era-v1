@@ -116,28 +116,28 @@ def apply_cifar_image_transformations(mean=CIFAR_MEAN, std=CIFAR_STD, cutout_siz
     return train_transforms, test_transforms
 
 
-def split_cifar_data(data_path, train_transforms, test_transforms):
-    """
-    Function to download the MNIST data
-    """
-    # print("Downloading CIFAR10 dataset\n")
-    # Download MNIST dataset
-    train_data = datasets.CIFAR10(data_path, train=True, download=True)
-    test_data = datasets.CIFAR10(data_path, train=False, download=True)
+# def split_cifar_data(data_path, train_transforms, test_transforms):
+#     """
+#     Function to download the MNIST data
+#     """
+#     # print("Downloading CIFAR10 dataset\n")
+#     # Download MNIST dataset
+#     train_data = datasets.CIFAR10(data_path, train=True, download=True)
+#     test_data = datasets.CIFAR10(data_path, train=False, download=True)
 
-    # Calculate and print the mean and standard deviation of the dataset
-    mean, std = calculate_mean_std(train_data)
-    # print(f"\nMean: {mean}")
-    # print(f"Std: {std}")
+#     # Calculate and print the mean and standard deviation of the dataset
+#     mean, std = calculate_mean_std(train_data)
+#     # print(f"\nMean: {mean}")
+#     # print(f"Std: {std}")
 
-    # Apply transforms on the dataset
-    # Use the above class to apply transforms on the dataset using albumentations
-    train_data = CIFAR10Transforms(train_data, train_transforms)
-    test_data = CIFAR10Transforms(test_data, test_transforms)
+#     # Apply transforms on the dataset
+#     # Use the above class to apply transforms on the dataset using albumentations
+#     train_data = CIFAR10Transforms(train_data, train_transforms)
+#     test_data = CIFAR10Transforms(test_data, test_transforms)
 
-    # print("Transformations applied on the dataset")
+#     # print("Transformations applied on the dataset")
 
-    return train_data, test_data
+#     return train_data, test_data
 
 
 def calculate_mean_std(dataset):
@@ -148,39 +148,39 @@ def calculate_mean_std(dataset):
     return mean, std
 
 
-def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
-    """Get the final train and test data loaders"""
+# def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
+#     """Get the final train and test data loaders"""
 
-    ## Data Transformations
-    train_transforms, test_transforms = apply_cifar_image_transformations(
-        mean=CIFAR_MEAN, std=CIFAR_STD, cutout_size=CUTOUT_SIZE
-    )
+#     ## Data Transformations
+#     train_transforms, test_transforms = apply_cifar_image_transformations(
+#         mean=CIFAR_MEAN, std=CIFAR_STD, cutout_size=CUTOUT_SIZE
+#     )
 
-    # print(f"Train and test data path: {data_path}")
+#     # print(f"Train and test data path: {data_path}")
 
-    # Train and Test data
-    # print("Splitting the dataset into train and test\n")
-    train_data, test_data = split_cifar_data(data_path, train_transforms, test_transforms)
+#     # Train and Test data
+#     # print("Splitting the dataset into train and test\n")
+#     train_data, test_data = split_cifar_data(data_path, train_transforms, test_transforms)
 
-    # To be passed to dataloader
-    def _init_fn(worker_id):
-        np.random.seed(int(seed))
+#     # To be passed to dataloader
+#     def _init_fn(worker_id):
+#         np.random.seed(int(seed))
 
-    # dataloader arguments - something you'll fetch these from cmdprmt
-    dataloader_args = dict(
-        shuffle=True,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        pin_memory=True,
-        worker_init_fn=_init_fn,
-    )
+#     # dataloader arguments - something you'll fetch these from cmdprmt
+#     dataloader_args = dict(
+#         shuffle=True,
+#         batch_size=batch_size,
+#         num_workers=num_workers,
+#         pin_memory=True,
+#         worker_init_fn=_init_fn,
+#     )
 
-    # print(f"Dataloader arguments: {dataloader_args}\n")
-    # print("Creating train and test dataloaders\n")
-    # train dataloader
-    train_loader = DataLoader(train_data, **dataloader_args)
+#     # print(f"Dataloader arguments: {dataloader_args}\n")
+#     # print("Creating train and test dataloaders\n")
+#     # train dataloader
+#     train_loader = DataLoader(train_data, **dataloader_args)
 
-    # test dataloader
-    test_loader = DataLoader(test_data, **dataloader_args)
+#     # test dataloader
+#     test_loader = DataLoader(test_data, **dataloader_args)
 
-    return train_loader, test_loader
+#     return train_loader, test_loader
