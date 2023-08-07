@@ -27,8 +27,13 @@ class CIFARDataModule(pl.LightningDataModule):
         }
         self.prepare_data_per_node = False
 
-        # Make sure data is downloaded
-        self.prepare_data()
+        # Fixes attribute defined outside __init__ warning
+        self.training_dataset = None
+        self.validation_dataset = None
+        self.testing_dataset = None
+
+        # # Make sure data is downloaded
+        # self.prepare_data()
 
     def _split_train_val(self, dataset):
         """Split the dataset into train and validation sets"""
@@ -41,8 +46,9 @@ class CIFARDataModule(pl.LightningDataModule):
         # seed_everything(int(self.seed))
 
         # Calculate lengths of each dataset
-        train_length = int((1 - self.val_split) * len(dataset))
-        val_length = len(dataset) - train_length
+        total_length = len(dataset)
+        train_length = int((1 - self.val_split) * total_length)
+        val_length = total_length - train_length
 
         # Split the dataset
         train_dataset, val_dataset = random_split(dataset, [train_length, val_length])
