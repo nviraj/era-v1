@@ -56,6 +56,30 @@ class CustomResNet(pl.LightningModule):
     def __init__(self):
         super().__init__()
 
+        # Define loss function
+        # https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
+        self.loss_function = torch.nn.CrossEntropyLoss()
+
+        # Define accuracy function
+        # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
+        self.accuracy_function = Accuracy(task="multiclass", num_classes=10)
+
+        # Get lr finder values
+        self.lr_finder = None
+
+        # Add results dictionary
+        self.results = {
+            "train_loss": [],
+            "train_acc": [],
+            "test_loss": [],
+            "test_acc": [],
+            "val_loss": [],
+            "val_acc": [],
+        }
+
+        # Save misclassified images
+        self.misclassified_image_data = {"images": [], "ground_truths": [], "predicted_vals": []}
+
         #  Model Notes
 
         # PrepLayer - Conv 3x3 s1, p1) >> BN >> RELU [64k]
@@ -188,17 +212,6 @@ class CustomResNet(pl.LightningModule):
 
         # FC Layer
         self.fc = nn.Linear(512, 10)
-
-        # Define loss function
-        # https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
-        self.loss_function = torch.nn.CrossEntropyLoss()
-
-        # Define accuracy function
-        # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
-        self.accuracy_function = Accuracy(task="multiclass", num_classes=10)
-
-        # Get lr finder values
-        self.lr_finder = None
 
     def print_view(self, x, msg=""):
         """Print shape of the model"""
@@ -339,6 +352,35 @@ class CustomResNet(pl.LightningModule):
 
         return loss, acc
 
+    # Get misclassified images based on how many images to return
+    def store_misclassified_images(self):
+        """Get an array of misclassified images"""
+
+        self.misclassified_image_data = {"images": [], "ground_truths": [], "predicted_vals": []}
+
+        # Initialize the model to evaluation mode
+        self.eval()
+
+        # Disable gradient calculation while testing
+        with torch.no_grad():
+            for batch in self.test_dataloader():
+                # Move data and labels to device
+                data, target = batch
+
+                # Predict using model
+                pred = self.forward(data)
+
+                # Get the index of the max log-probability
+                output = pred.argmax(dim=1)
+
+                # Save the incorrect predictions
+                incorrect_indices = ~output.eq(target)
+
+                # Store images incorrectly predicted, generated predictions and the actual value
+                self.misclassified_image_data["images"].extend(data[incorrect_indices].detach())
+                self.misclassified_image_data["ground_truths"].extend(target[incorrect_indices].detach())
+                self.misclassified_image_data["predicted_vals"].extend(pred[incorrect_indices].detach())
+
     # training function
     def training_step(self, batch, batch_idx):
         """Training step"""
@@ -347,7 +389,7 @@ class CustomResNet(pl.LightningModule):
         loss, acc = self.compute_metrics(batch)
 
         self.log("train_loss", loss, prog_bar=True, on_epoch=True, logger=True)
-        self.log("train_acc", acc, on_epoch=True, logger=True)
+        self.log("train_acc", acc, prog_bar=True, on_epoch=True, logger=True)
         # Return training loss
         return loss
 
@@ -359,7 +401,7 @@ class CustomResNet(pl.LightningModule):
         loss, acc = self.compute_metrics(batch)
 
         self.log("val_loss", loss, prog_bar=True, on_epoch=True, logger=True)
-        self.log("val_acc", acc, on_epoch=True, logger=True)
+        self.log("val_acc", acc, prog_bar=True, on_epoch=True, logger=True)
         # Return validation loss
         return loss
 
@@ -371,10 +413,41 @@ class CustomResNet(pl.LightningModule):
         loss, acc = self.compute_metrics(batch)
 
         self.log("test_loss", loss, prog_bar=True, on_epoch=True, logger=True)
-        self.log("test_acc", acc, on_epoch=True, logger=True)
+        self.log("test_acc", acc, prog_bar=True, on_epoch=True, logger=True)
         # Return validation loss
         return loss
 
     def on_train_start(self):
         """Set lr finder value"""
         self.lr_finder = self.find_optimal_lr(train_loader=self.train_dataloader())
+
+    # At the end of train epoch append the training loss and accuracy to an instance variable called results
+    def on_train_epoch_end(self):
+        """On train epoch end"""
+
+        # Append training loss and accuracy to results
+        self.results["train_loss"].append(self.trainer.callback_metrics["train_loss"])
+        self.results["train_acc"].append(self.trainer.callback_metrics["train_acc"])
+
+    # At the end of validation epoch append the validation loss and accuracy to an instance variable called results
+    def on_validation_epoch_end(self):
+        """On validation epoch end"""
+
+        # Append validation loss and accuracy to results
+        self.results["val_loss"].append(self.trainer.callback_metrics["val_loss"])
+        self.results["val_acc"].append(self.trainer.callback_metrics["val_acc"])
+
+    # At the end of test epoch append the test loss and accuracy to an instance variable called results
+    def on_test_epoch_end(self):
+        """On test epoch end"""
+
+        # Append test loss and accuracy to results
+        self.results["test_loss"].append(self.trainer.callback_metrics["test_loss"])
+        self.results["test_acc"].append(self.trainer.callback_metrics["test_acc"])
+
+    # At the end of test save misclassified images, the predictions and ground truth in an instance variable called misclassified_image_data
+    def on_test_end(self):
+        """On test end"""
+
+        # Get misclassified images
+        self.store_misclassified_images()
