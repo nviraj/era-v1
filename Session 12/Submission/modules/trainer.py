@@ -230,8 +230,8 @@ def train_and_test_model(
     checkpoint = ModelCheckpoint(
         dirpath=config.CHECKPOINT_PATH, monitor="val_acc", mode="max", filename="model_best_epoch", save_last=True
     )
-    # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.LearningRateMonitor.html#learningratemonitor
-    lr_rate_monitor = LearningRateMonitor(logging_interval="epoch", log_momentum=True)
+    # # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.LearningRateMonitor.html#learningratemonitor
+    # lr_rate_monitor = LearningRateMonitor(logging_interval="epoch", log_momentum=True)
 
     # Change trainer settings for debugging
     if debug:
@@ -257,7 +257,8 @@ def train_and_test_model(
         num_sanity_val_steps=5,
         profiler=profiler,
         check_val_every_n_epoch=1,
-        callbacks=[checkpoint, lr_rate_monitor],
+        # callbacks=[checkpoint, lr_rate_monitor],
+        callbacks=[checkpoint],
     )
 
     model.lr_finder = model.find_optimal_lr(train_loader=datamodule.train_dataloader())
