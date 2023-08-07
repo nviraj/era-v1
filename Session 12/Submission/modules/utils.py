@@ -3,23 +3,22 @@ import os
 
 import torch
 
+# def get_device():
+#     """
+#     Function to get the device to be used for training and testing.
+#     """
 
-def get_device():
-    """
-    Function to get the device to be used for training and testing.
-    """
+#     # Check if cuda is available
+#     cuda = torch.cuda.is_available()
 
-    # Check if cuda is available
-    cuda = torch.cuda.is_available()
+#     # Based on check enable cuda if present, if not available
+#     if cuda:
+#         final_choice = "cuda"
+#     else:
+#         final_choice = "cpu"
 
-    # Based on check enable cuda if present, if not available
-    if cuda:
-        final_choice = "cuda"
-    else:
-        final_choice = "cpu"
-
-    # pylint: disable=E1101
-    return final_choice, torch.device(final_choice)
+#     # pylint: disable=E1101
+#     return final_choice, torch.device(final_choice)
 
 
 def get_num_workers(model_run_location):
