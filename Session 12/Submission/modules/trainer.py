@@ -2,11 +2,9 @@
 
 # from functools import partial
 
+import modules.config as config
 import pytorch_lightning as pl
-import torch
-from modules.utils import get_correct_prediction_count, save_model
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from tqdm import tqdm
 
 # Define all the required pytorch lightning callbacks
 lr_monitor = LearningRateMonitor(logging_interval="step")
@@ -218,7 +216,6 @@ def train_and_test_model(
     model,
     datamodule,
     logger,
-    misclassified_image_data,
     debug=False,
 ):
     """Trains and tests the model by iterating through epochs"""
@@ -229,19 +226,22 @@ def train_and_test_model(
     results = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
 
     # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelCheckpoint.html#modelcheckpoint
-    checkpoint = ModelCheckpoint(monitor="val_acc", mode="max", filename="model_best_epoch", save_last=True)
-    lr_rate_monitor = LearningRateMonitor(logging_interval="epoch")
+    checkpoint = ModelCheckpoint(
+        dirpath=config.CHECKPOINT_PATH, monitor="val_acc", mode="max", filename="model_best_epoch", save_last=True
+    )
+    # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.LearningRateMonitor.html#learningratemonitor
+    lr_rate_monitor = LearningRateMonitor(logging_interval="epoch", log_momentum=True)
 
     # Change trainer settings for debugging
     if debug:
         num_epochs = 1
         fast_dev_run = True
         overfit_batches = 0.1
-        profiler = "simple"
+        profiler = "advanced"
     else:
         fast_dev_run = False
         overfit_batches = 0.0
-        profiler = None
+        profiler = "simple"
 
     # https://lightning.ai/docs/pytorch/stable/common/trainer.html#methods
     trainer = pl.Trainer(
@@ -260,4 +260,11 @@ def train_and_test_model(
 
     trainer.fit(model, datamodule=datamodule)
     trainer.test(model, datamodule=datamodule)
-    return trainer
+
+    # Obtain the results dictionary from model
+    results = model.results
+
+    # Get the list of misclassified images
+    misclassified_image_data = model.misclassified_image_data
+
+    return trainer, results, misclassified_image_data
