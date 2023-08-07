@@ -1,6 +1,4 @@
 """This file contains functions to prepare dataloader in the way lightning expects"""
-import os
-
 import pytorch_lightning as pl
 import torchvision.datasets as datasets
 from lightning_fabric.utilities.seed import seed_everything
