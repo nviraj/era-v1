@@ -246,7 +246,7 @@ def train_and_test_model(
 
     # https://lightning.ai/docs/pytorch/stable/common/trainer.html#methods
     trainer = pl.Trainer(
-        precision="bf16-mixed",
+        precision=16,
         fast_dev_run=fast_dev_run,
         devices="auto",
         accelerator="auto",
