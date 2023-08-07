@@ -256,6 +256,7 @@ def train_and_test_model(
         log_every_n_steps=10,
         num_sanity_val_steps=5,
         profiler=profiler,
+        check_val_every_n_epoch=1,
         callbacks=[checkpoint, lr_rate_monitor],
     )
 

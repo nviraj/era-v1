@@ -339,7 +339,7 @@ class CustomResNet(pl.LightningModule):
         data, target = batch
 
         # Generate predictions using model
-        pred = self.forward(data)
+        pred = self(data)
 
         # Calculate loss for the batch
         loss = self.compute_loss(prediction=pred, target=target)
@@ -365,7 +365,7 @@ class CustomResNet(pl.LightningModule):
                 data, target = batch
 
                 # Predict using model
-                pred = self.forward(data)
+                pred = self(data)
 
                 # Get the index of the max log-probability
                 output = pred.argmax(dim=1)

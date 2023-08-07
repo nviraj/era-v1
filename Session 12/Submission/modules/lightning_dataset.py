@@ -18,16 +18,17 @@ class CIFARDataModule(pl.LightningDataModule):
         self.val_split = val_split
         self.num_workers = num_workers
         self.dataloader_dict = {
-            "shuffle": True,
+            # "shuffle": True,
             "batch_size": self.batch_size,
             "num_workers": self.num_workers,
             "pin_memory": True,
-            "worker_init_fn": self._init_fn,
-            "persistent_workers": True if self.num_workers > 0 else False,
+            # "worker_init_fn": self._init_fn,
+            "persistent_workers": self.num_workers > 0,
         }
+        self.prepare_data_per_node = False
 
-        # Make sure data is downloaded
-        self.prepare_data()
+        # # Make sure data is downloaded
+        # self.prepare_data()
 
     def _split_train_val(self, dataset):
         """Split the dataset into train and validation sets"""
@@ -58,7 +59,7 @@ class CIFARDataModule(pl.LightningDataModule):
     # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.core.hooks.DataHooks.html#lightning.pytorch.core.hooks.DataHooks.setup
     def setup(self, stage=None):
         # seed_everything(int(self.seed))
-        # self.prepare_data()
+        self.prepare_data()
         # Define the data transformations
         train_transforms, test_transforms = apply_cifar_image_transformations()
         val_transforms = test_transforms
@@ -83,24 +84,15 @@ class CIFARDataModule(pl.LightningDataModule):
 
     # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#train-dataloader
     def train_dataloader(self):
-        return DataLoader(
-            self.training_dataset,
-            **self.dataloader_dict,
-        )
+        return DataLoader(self.training_dataset, **self.dataloader_dict, shuffle=True)
 
     # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#val-dataloader
     def val_dataloader(self):
-        return DataLoader(
-            self.validation_dataset,
-            **self.dataloader_dict,
-        )
+        return DataLoader(self.validation_dataset, **self.dataloader_dict, shuffle=False)
 
     # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#test-dataloader
     def test_dataloader(self):
-        return DataLoader(
-            self.testing_dataset,
-            **self.dataloader_dict,
-        )
+        return DataLoader(self.testing_dataset, **self.dataloader_dict, shuffle=False)
 
     def _init_fn(self, worker_id):
         seed_everything(int(self.seed) + worker_id)

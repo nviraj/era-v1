@@ -9,7 +9,7 @@ CHECKPOINT_PATH = "../../checkpoints/"
 LOGGING_PATH = "../../logs/"
 
 # Specify the number of epochs
-NUM_EPOCHS = 3
+NUM_EPOCHS = 20
 
 # Set the batch size
 BATCH_SIZE = 512
