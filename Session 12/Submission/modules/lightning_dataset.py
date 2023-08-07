@@ -27,8 +27,8 @@ class CIFARDataModule(pl.LightningDataModule):
         }
         self.prepare_data_per_node = False
 
-        # # Make sure data is downloaded
-        # self.prepare_data()
+        # Make sure data is downloaded
+        self.prepare_data()
 
     def _split_train_val(self, dataset):
         """Split the dataset into train and validation sets"""
@@ -59,28 +59,33 @@ class CIFARDataModule(pl.LightningDataModule):
     # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.core.hooks.DataHooks.html#lightning.pytorch.core.hooks.DataHooks.setup
     def setup(self, stage=None):
         # seed_everything(int(self.seed))
-        self.prepare_data()
+
         # Define the data transformations
         train_transforms, test_transforms = apply_cifar_image_transformations()
         val_transforms = test_transforms
 
-        # Load the appropriate CIFAR10 dataset
-        full_data = datasets.CIFAR10(self.data_path, train=True)
-
-        # Assign Test split(s) for use in Dataloaders
-        data_test = datasets.CIFAR10(self.data_path, train=False)
-        self.testing_dataset = CIFAR10Transforms(data_test, test_transforms)
-
         # Create train and validation datasets
-        if self.val_split != 0:
-            data_train, data_val = self._split_train_val(full_data)
+        if stage == "fit" or stage is None:
+            if self.val_split != 0:
+                # Split the training data into training and validation sets
+                data_train, data_val = self._split_train_val(datasets.CIFAR10(self.data_path, train=True))
+                # Apply transformations
+                self.training_dataset = CIFAR10Transforms(data_train, train_transforms)
+                self.validation_dataset = CIFAR10Transforms(data_val, val_transforms)
+            else:
+                # Only training data here
+                self.training_dataset = CIFAR10Transforms(
+                    datasets.CIFAR10(self.data_path, train=True), train_transforms
+                )
+                # Validation will be same sa test
+                self.validation_dataset = CIFAR10Transforms(
+                    datasets.CIFAR10(self.data_path, train=False), val_transforms
+                )
 
-            self.training_dataset = CIFAR10Transforms(data_train, train_transforms)
-            self.validation_dataset = CIFAR10Transforms(data_val, val_transforms)
-        else:
-            # Only training data here
-            self.training_dataset = CIFAR10Transforms(full_data, train_transforms)
-            self.validation_dataset = CIFAR10Transforms(data_test, val_transforms)
+        # Create test dataset
+        if stage == "test" or stage is None:
+            # Assign Test split(s) for use in Dataloaders
+            self.testing_dataset = CIFAR10Transforms(datasets.CIFAR10(self.data_path, train=False), test_transforms)
 
     # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#train-dataloader
     def train_dataloader(self):
