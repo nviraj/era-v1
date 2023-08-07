@@ -35,7 +35,6 @@ def detailed_model_summary(model, input_size):
             "num_params",
             "trainable",
         ),
-        # device=device,
         verbose=1,
         col_width=16,
     )
@@ -199,7 +198,7 @@ class CustomResNet(pl.LightningModule):
         self.accuracy_function = Accuracy(task="multiclass", num_classes=10)
 
         # Get lr finder values
-        self.lr_finder = self.find_optimal_lr()
+        self.lr_finder = None
 
     def print_view(self, x, msg=""):
         """Print shape of the model"""
@@ -250,7 +249,7 @@ class CustomResNet(pl.LightningModule):
         # Softmax
         return F.log_softmax(x, dim=-1)
 
-    def find_optimal_lr(self):
+    def find_optimal_lr(self, train_loader):
         """Use LR Finder to find the best starting learning rate"""
 
         # https://github.com/davidtvs/pytorch-lr-finder
@@ -262,7 +261,7 @@ class CustomResNet(pl.LightningModule):
 
         # Create LR finder object
         lr_finder = LRFinder(self, optimizer=tmp_optimizer, criterion=self.loss_function)
-        lr_finder.range_test(train_loader=self.trainer.train_dataloader, end_lr=10, num_iter=100)
+        lr_finder.range_test(train_loader=train_loader, end_lr=10, num_iter=100)
         # https://github.com/davidtvs/pytorch-lr-finder/issues/88
         _, suggested_lr = lr_finder.plot(suggest_lr=True)
         lr_finder.reset()
@@ -280,13 +279,19 @@ class CustomResNet(pl.LightningModule):
         """Add ADAM optimizer to the lightning module"""
         optimizer = optim.Adam(self.parameters(), lr=PREFERRED_START_LR, weight_decay=PREFERRED_WEIGHT_DECAY)
 
+        # Percent start for OneCycleLR
+        # Handles the case where max_epochs is less than 5
+        percent_start = 5 / int(self.trainer.max_epochs)
+        if percent_start > 1:
+            percent_start = 0.3
+
         # https://lightning.ai/docs/pytorch/stable/common/optimization.html#total-stepping-batches
         scheduler_dict = {
             "scheduler": OneCycleLR(
                 optimizer=optimizer,
                 max_lr=self.lr_finder,
                 total_steps=int(self.trainer.estimated_stepping_batches),
-                pct_start=(5 / int(self.trainer.max_epochs)),
+                pct_start=percent_start,
                 div_factor=100,
                 three_phase=False,
                 anneal_strategy="linear",
@@ -341,8 +346,8 @@ class CustomResNet(pl.LightningModule):
         # Compute loss and accuracy
         loss, acc = self.compute_metrics(batch)
 
-        self.log("train_loss", loss, prog_bar=True)
-        self.log("train_acc", acc)
+        self.log("train_loss", loss, prog_bar=True, on_epoch=True, logger=True)
+        self.log("train_acc", acc, on_epoch=True, logger=True)
         # Return training loss
         return loss
 
@@ -353,13 +358,23 @@ class CustomResNet(pl.LightningModule):
         # Compute loss and accuracy
         loss, acc = self.compute_metrics(batch)
 
-        self.log("val_loss", loss, prog_bar=True)
-        self.log("val_acc", acc)
+        self.log("val_loss", loss, prog_bar=True, on_epoch=True, logger=True)
+        self.log("val_acc", acc, on_epoch=True, logger=True)
         # Return validation loss
         return loss
 
     # test function will just use validation step
     def test_step(self, batch, batch_idx):
         """Test step"""
-        # Here we just reuse the validation_step for testing
-        return self.validation_step(batch, batch_idx)
+
+        # Compute loss and accuracy
+        loss, acc = self.compute_metrics(batch)
+
+        self.log("test_loss", loss, prog_bar=True, on_epoch=True, logger=True)
+        self.log("test_acc", acc, on_epoch=True, logger=True)
+        # Return validation loss
+        return loss
+
+    def on_train_start(self):
+        """Set lr finder value"""
+        self.lr_finder = self.find_optimal_lr(train_loader=self.train_dataloader())
