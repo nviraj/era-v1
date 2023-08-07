@@ -252,6 +252,8 @@ def train_and_test_model(
         max_epochs=num_epochs,
         logger=logger,
         overfit_batches=overfit_batches,
+        log_every_n_steps=1,
+        num_sanity_val_steps=5,
         profiler=profiler,
         callbacks=[checkpoint, lr_rate_monitor],
     )
