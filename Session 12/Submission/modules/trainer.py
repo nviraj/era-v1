@@ -242,21 +242,23 @@ def train_and_test_model(
     else:
         fast_dev_run = False
         overfit_batches = 0.0
-        profiler = "simple"
+        profiler = None
 
     # https://lightning.ai/docs/pytorch/stable/common/trainer.html#methods
     trainer = pl.Trainer(
         precision=16,
         fast_dev_run=fast_dev_run,
-        devices="auto",
-        accelerator="auto",
+        # deterministic=True,
+        # devices="auto",
+        # accelerator="auto",
         max_epochs=num_epochs,
         logger=logger,
+        # enable_model_summary=False,
         overfit_batches=overfit_batches,
         log_every_n_steps=10,
-        num_sanity_val_steps=5,
+        # num_sanity_val_steps=5,
         profiler=profiler,
-        check_val_every_n_epoch=1,
+        # check_val_every_n_epoch=1,
         # callbacks=[checkpoint, lr_rate_monitor],
         callbacks=[checkpoint],
     )
@@ -264,13 +266,15 @@ def train_and_test_model(
     model.lr_finder = model.find_optimal_lr(train_loader=datamodule.train_dataloader())
 
     trainer.fit(model, datamodule=datamodule)
-    trainer.test(model, datamodule=datamodule.test_dataloader())
+    trainer.test(model, dataloaders=datamodule.test_dataloader())
 
     # # Obtain the results dictionary from model
-    # results = model.results
+    results = model.results
+    print(f"Results Length: {len(results)}")
 
     # Get the list of misclassified images
     misclassified_image_data = model.misclassified_image_data
+    print(f"Misclassified Images Length: {len(misclassified_image_data)}")
 
-    # return trainer, results, misclassified_image_data
-    return trainer, misclassified_image_data
+    return trainer, results, misclassified_image_data
+    # return trainer
