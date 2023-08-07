@@ -26,6 +26,9 @@ class CIFARDataModule(pl.LightningDataModule):
             "persistent_workers": True if self.num_workers > 0 else False,
         }
 
+        # Make sure data is downloaded
+        self.prepare_data()
+
     def _split_train_val(self, dataset):
         """Split the dataset into train and validation sets"""
 
@@ -76,7 +79,7 @@ class CIFARDataModule(pl.LightningDataModule):
         else:
             # Only training data here
             self.training_dataset = CIFAR10Transforms(full_data, train_transforms)
-            self.validation_dataset = self.testing_dataset
+            self.validation_dataset = CIFAR10Transforms(data_test, val_transforms)
 
     # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#train-dataloader
     def train_dataloader(self):

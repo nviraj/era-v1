@@ -5,6 +5,7 @@
 import modules.config as config
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.profilers import AdvancedProfiler, SimpleProfiler
 
 # Define all the required pytorch lightning callbacks
 lr_monitor = LearningRateMonitor(logging_interval="step")
@@ -222,8 +223,8 @@ def train_and_test_model(
 
     print(f"\n\nBatch size: {batch_size}, Total epochs: {num_epochs}\n\n")
 
-    # Hold the results for every epoch
-    results = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
+    # # Hold the results for every epoch
+    # results = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
 
     # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelCheckpoint.html#modelcheckpoint
     checkpoint = ModelCheckpoint(
@@ -252,19 +253,22 @@ def train_and_test_model(
         max_epochs=num_epochs,
         logger=logger,
         overfit_batches=overfit_batches,
-        log_every_n_steps=1,
+        log_every_n_steps=10,
         num_sanity_val_steps=5,
         profiler=profiler,
         callbacks=[checkpoint, lr_rate_monitor],
     )
 
-    trainer.fit(model, datamodule=datamodule)
-    trainer.test(model, datamodule=datamodule)
+    model.lr_finder = model.find_optimal_lr(train_loader=datamodule.train_dataloader())
 
-    # Obtain the results dictionary from model
-    results = model.results
+    trainer.fit(model, datamodule=datamodule)
+    trainer.test(model, datamodule=datamodule.test_dataloader())
+
+    # # Obtain the results dictionary from model
+    # results = model.results
 
     # Get the list of misclassified images
     misclassified_image_data = model.misclassified_image_data
 
-    return trainer, results, misclassified_image_data
+    # return trainer, results, misclassified_image_data
+    return trainer, misclassified_image_data

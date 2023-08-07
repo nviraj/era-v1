@@ -64,18 +64,15 @@ class CustomResNet(pl.LightningModule):
         # https://torchmetrics.readthedocs.io/en/stable/classification/accuracy.html
         self.accuracy_function = Accuracy(task="multiclass", num_classes=10)
 
-        # Get lr finder values
-        self.lr_finder = None
-
-        # Add results dictionary
-        self.results = {
-            "train_loss": [],
-            "train_acc": [],
-            "test_loss": [],
-            "test_acc": [],
-            "val_loss": [],
-            "val_acc": [],
-        }
+        # # Add results dictionary
+        # self.results = {
+        #     "train_loss": [],
+        #     "train_acc": [],
+        #     "test_loss": [],
+        #     "test_acc": [],
+        #     "val_loss": [],
+        #     "val_acc": [],
+        # }
 
         # Save misclassified images
         self.misclassified_image_data = {"images": [], "ground_truths": [], "predicted_vals": []}
@@ -363,7 +360,7 @@ class CustomResNet(pl.LightningModule):
 
         # Disable gradient calculation while testing
         with torch.no_grad():
-            for batch in self.test_dataloader():
+            for batch in self.trainer.test_dataloaders:
                 # Move data and labels to device
                 data, target = batch
 
@@ -400,8 +397,8 @@ class CustomResNet(pl.LightningModule):
         # Compute loss and accuracy
         loss, acc = self.compute_metrics(batch)
 
-        self.log("val_loss", loss, prog_bar=True, on_epoch=True, logger=True)
-        self.log("val_acc", acc, prog_bar=True, on_epoch=True, logger=True)
+        self.log("val_loss", loss, prog_bar=False, on_epoch=True, logger=True)
+        self.log("val_acc", acc, prog_bar=False, on_epoch=True, logger=True)
         # Return validation loss
         return loss
 
@@ -412,42 +409,38 @@ class CustomResNet(pl.LightningModule):
         # Compute loss and accuracy
         loss, acc = self.compute_metrics(batch)
 
-        self.log("test_loss", loss, prog_bar=True, on_epoch=True, logger=True)
-        self.log("test_acc", acc, prog_bar=True, on_epoch=True, logger=True)
+        self.log("test_loss", loss, prog_bar=False, on_epoch=True, logger=True)
+        self.log("test_acc", acc, prog_bar=False, on_epoch=True, logger=True)
         # Return validation loss
         return loss
 
-    def on_train_start(self):
-        """Set lr finder value"""
-        self.lr_finder = self.find_optimal_lr(train_loader=self.train_dataloader())
+    # # At the end of train epoch append the training loss and accuracy to an instance variable called results
+    # def on_train_epoch_end(self):
+    #     """On train epoch end"""
 
-    # At the end of train epoch append the training loss and accuracy to an instance variable called results
-    def on_train_epoch_end(self):
-        """On train epoch end"""
+    #     # Append training loss and accuracy to results
+    #     self.results["train_loss"].append(self.trainer.callback_metrics["train_loss"].detach())
+    #     self.results["train_acc"].append(self.trainer.callback_metrics["train_acc"].detach())
 
-        # Append training loss and accuracy to results
-        self.results["train_loss"].append(self.trainer.callback_metrics["train_loss"])
-        self.results["train_acc"].append(self.trainer.callback_metrics["train_acc"])
+    # # At the end of validation epoch append the validation loss and accuracy to an instance variable called results
+    # def on_validation_epoch_end(self):
+    #     """On validation epoch end"""
 
-    # At the end of validation epoch append the validation loss and accuracy to an instance variable called results
-    def on_validation_epoch_end(self):
-        """On validation epoch end"""
+    #     # Append validation loss and accuracy to results
+    #     self.results["val_loss"].append(self.trainer.callback_metrics["val_loss"].detach())
+    #     self.results["val_acc"].append(self.trainer.callback_metrics["val_acc"].detach())
 
-        # Append validation loss and accuracy to results
-        self.results["val_loss"].append(self.trainer.callback_metrics["val_loss"])
-        self.results["val_acc"].append(self.trainer.callback_metrics["val_acc"])
+    # # At the end of test epoch append the test loss and accuracy to an instance variable called results
+    # def on_test_epoch_end(self):
+    #     """On test epoch end"""
 
-    # At the end of test epoch append the test loss and accuracy to an instance variable called results
-    def on_test_epoch_end(self):
-        """On test epoch end"""
+    #     # Append test loss and accuracy to results
+    #     self.results["test_loss"].append(self.trainer.callback_metrics["test_loss"].detach())
+    #     self.results["test_acc"].append(self.trainer.callback_metrics["test_acc"].detach())
 
-        # Append test loss and accuracy to results
-        self.results["test_loss"].append(self.trainer.callback_metrics["test_loss"])
-        self.results["test_acc"].append(self.trainer.callback_metrics["test_acc"])
+    # # At the end of test save misclassified images, the predictions and ground truth in an instance variable called misclassified_image_data
+    # def on_test_end(self):
+    #     """On test end"""
 
-    # At the end of test save misclassified images, the predictions and ground truth in an instance variable called misclassified_image_data
-    def on_test_end(self):
-        """On test end"""
-
-        # Get misclassified images
-        self.store_misclassified_images()
+    #     # # Get misclassified images
+    #     # self.store_misclassified_images()
