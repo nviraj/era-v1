@@ -170,3 +170,7 @@ data/*
 *.pkl
 *.pt
 *.pth
+
+# Log folder
+logs/*
+checkpoints/*
