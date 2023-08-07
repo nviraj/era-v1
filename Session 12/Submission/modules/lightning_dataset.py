@@ -1,4 +1,6 @@
 """This file contains functions to prepare dataloader in the way lightning expects"""
+import os
+
 import pytorch_lightning as pl
 import torchvision.datasets as datasets
 from lightning_fabric.utilities.seed import seed_everything
@@ -9,20 +11,21 @@ from torch.utils.data import DataLoader, random_split
 class CIFARDataModule(pl.LightningDataModule):
     """Lightning DataModule for CIFAR10 dataset"""
 
-    def __init__(self, data_path, batch_size, num_workers, seed, val_split=0):
+    def __init__(self, data_path, batch_size, seed, val_split=0, num_workers=0):
         super().__init__()
 
         self.data_path = data_path
         self.batch_size = batch_size
-        self.num_workers = num_workers
         self.seed = seed
         self.val_split = val_split
+        self.num_workers = num_workers
         self.dataloader_dict = {
             "shuffle": True,
             "batch_size": self.batch_size,
             "num_workers": self.num_workers,
             "pin_memory": True,
             "worker_init_fn": self._init_fn,
+            "persistent_workers": True if self.num_workers > 0 else False,
         }
 
     def _split_train_val(self, dataset):
@@ -74,7 +77,7 @@ class CIFARDataModule(pl.LightningDataModule):
             self.validation_dataset = CIFAR10Transforms(data_val, val_transforms)
         else:
             # Only training data here
-            self.training_dataset = full_data
+            self.training_dataset = CIFAR10Transforms(full_data, train_transforms)
             self.validation_dataset = self.testing_dataset
 
     # https://lightning.ai/docs/pytorch/stable/data/datamodule.html#train-dataloader
