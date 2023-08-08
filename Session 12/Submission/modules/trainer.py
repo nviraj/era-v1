@@ -11,7 +11,6 @@ from pytorch_lightning.tuner.tuning import Tuner
 
 # What is the start LR and weight decay you'd prefer?
 PREFERRED_START_LR = config.PREFERRED_START_LR
-PREFERRED_WEIGHT_DECAY = config.PREFERRED_WEIGHT_DECAY
 
 
 ############# Train and Test Functions #############
@@ -229,6 +228,8 @@ def train_and_test_model(
     # # Hold the results for every epoch
     # results = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
 
+    print("Defining Lightning Callbacks")
+
     # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelCheckpoint.html#modelcheckpoint
     checkpoint = ModelCheckpoint(
         dirpath=config.CHECKPOINT_PATH, monitor="val_acc", mode="max", filename="model_best_epoch", save_last=True
@@ -238,6 +239,7 @@ def train_and_test_model(
     # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelSummary.html#lightning.pytorch.callbacks.ModelSummary
     model_summary = ModelSummary(max_depth=0)
 
+    print("Defining Lightning Trainer")
     # Change trainer settings for debugging
     if debug:
         num_epochs = 1
@@ -274,6 +276,7 @@ def train_and_test_model(
     # Using the lr_find from Trainer.tune method instead
     # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.tuner.tuning.Tuner.html#lightning.pytorch.tuner.tuning.Tuner
     # https://www.youtube.com/watch?v=cLZv0eZQSIE
+    print("Finding the optimal learning rate using Lightning Tuner.")
     tuner = Tuner(trainer)
     tuner.lr_find(
         model=model,
@@ -290,10 +293,12 @@ def train_and_test_model(
     trainer.test(model, dataloaders=datamodule.test_dataloader())
 
     # # Obtain the results dictionary from model
+    print("Collecting epoch level model results.")
     results = model.results
     # print(f"Results Length: {len(results)}")
 
     # Get the list of misclassified images
+    print("Collecting misclassified images.")
     misclassified_image_data = model.misclassified_image_data
     # print(f"Misclassified Images Length: {len(misclassified_image_data)}")
 

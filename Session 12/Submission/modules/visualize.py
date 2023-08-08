@@ -144,9 +144,9 @@ def plot_gradcam_images(
         # https://github.com/jacobgil/pytorch-grad-cam/blob/master/pytorch_grad_cam/utils/model_targets.py
         grad_cam_output = cam(
             input_tensor=image.unsqueeze(0),
-            targets=targets
-            # aug_smooth=True,
-            # eigen_smooth=True,
+            targets=targets,
+            aug_smooth=True,
+            eigen_smooth=True,
         )
         grad_cam_output = grad_cam_output[0, :]
 
