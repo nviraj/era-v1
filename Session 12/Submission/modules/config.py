@@ -7,8 +7,8 @@
 DATA_PATH = "../../data/"
 CHECKPOINT_PATH = "../../checkpoints/"
 LOGGING_PATH = "../../logs/"
-MISCLASSIFIED_PATH = "../../misclassified/misclassified_data.pt"
-MODEL_PATH = "../../model/CustomResNet.pt"
+MISCLASSIFIED_PATH = "Misclassified_Data.pt"
+MODEL_PATH = "CustomResNet.pt"
 
 # Specify the number of epochs
 NUM_EPOCHS = 24
