@@ -4,6 +4,7 @@
 
 import modules.config as config
 import pytorch_lightning as pl
+import torch
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 
 # Import tuner
@@ -98,6 +99,20 @@ def train_and_test_model(
     print("Collecting misclassified images.")
     misclassified_image_data = model.misclassified_image_data
     # print(f"Misclassified Images Length: {len(misclassified_image_data)}")
+
+    # Save the model using torch save as backup
+    print("Saving the model.")
+    torch.save(model.state_dict(), config.MODEL_PATH)
+
+    # Save first 100 misclassified images data to a file
+    num_elements = 25
+    print(f"Saving first {num_elements} misclassified images.")
+    subset_misclassified_image_data = {"images": [], "ground_truths": [], "predicted_vals": []}
+    subset_misclassified_image_data["images"] = misclassified_image_data["images"][:num_elements]
+    subset_misclassified_image_data["ground_truths"] = misclassified_image_data["ground_truths"][:num_elements]
+    subset_misclassified_image_data["predicted_vals"] = misclassified_image_data["predicted_vals"][:num_elements]
+
+    torch.save(subset_misclassified_image_data, config.MISCLASSIFIED_PATH)
 
     return trainer, results, misclassified_image_data
     # return trainer
