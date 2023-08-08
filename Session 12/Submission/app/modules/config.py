@@ -5,6 +5,8 @@
 
 # Where do we store the data?
 CHECKPOINT_PATH = "assets/model/model_best_epoch.ckpt"
+MISCLASSIFIED_PATH = "assets/model/misclassified/misclassified_data.pt"
+MODEL_PATH = "assets/model/CustomResNet.pt"
 
 # Set seed value for reproducibility
 SEED = 53
