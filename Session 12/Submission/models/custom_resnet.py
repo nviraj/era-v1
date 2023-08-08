@@ -214,6 +214,9 @@ class CustomResNet(pl.LightningModule):
         # FC Layer
         self.fc = nn.Linear(512, 10)
 
+        # Save hyperparameters
+        self.save_hyperparameters()
+
     def print_view(self, x, msg=""):
         """Print shape of the model"""
         if self.print_shape:
