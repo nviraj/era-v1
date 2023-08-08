@@ -4,7 +4,6 @@
 # https://realpython.com/python-constants/
 
 # Where do we store the data?
-CHECKPOINT_PATH = "./assets/model/model_best_epoch.ckpt"
 MISCLASSIFIED_PATH = "./assets/model/Misclassified_Data.pt"
 MODEL_PATH = "./assets/model/CustomResNet.pt"
 
@@ -32,7 +31,6 @@ CIFAR_CLASSES = tuple(
         "truck",
     ]
 )
-
 
 # Needed to load model module
 # What is the start LR and weight decay you'd prefer?
