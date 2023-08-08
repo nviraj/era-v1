@@ -8,6 +8,7 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, Mo
 
 # Import tuner
 from pytorch_lightning.tuner.tuning import Tuner
+from tqdm.auto import tqdm
 
 # What is the start LR and weight decay you'd prefer?
 PREFERRED_START_LR = config.PREFERRED_START_LR
@@ -285,7 +286,7 @@ def train_and_test_model(
         max_lr=30,
         num_training=200,
         mode="linear",
-        early_stop_threshold=4,
+        early_stop_threshold=10,
         attr_name="learning_rate",
     )
 

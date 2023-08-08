@@ -15,8 +15,8 @@ NUM_EPOCHS = 24
 BATCH_SIZE = 512
 
 # Set seed value for reproducibility
-SEED = 26
+SEED = 53
 
 # What is the start LR and weight decay you'd prefer?
-PREFERRED_START_LR = 3e-2
+PREFERRED_START_LR = 5e-3
 PREFERRED_WEIGHT_DECAY = 1e-5
