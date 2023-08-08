@@ -129,7 +129,8 @@ def plot_gradcam_images(
     # Initialize the GradCAM object
     # https://github.com/jacobgil/pytorch-grad-cam/blob/master/pytorch_grad_cam/grad_cam.py
     # https://github.com/jacobgil/pytorch-grad-cam/blob/master/pytorch_grad_cam/base_cam.py
-    cam = GradCAM(model=model, target_layers=target_layers, use_cuda=True)
+    # Alert: Change the device to cpu for gradio app
+    cam = GradCAM(model=model, target_layers=target_layers, use_cuda=False)
 
     # Iterate through the images and plot them in the grid along with class labels
     for img_index in range(1, num_images + 1):
