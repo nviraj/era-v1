@@ -4,9 +4,9 @@
 # https://realpython.com/python-constants/
 
 # Where do we store the data?
-CHECKPOINT_PATH = "assets/model/model_best_epoch.ckpt"
-MISCLASSIFIED_PATH = "assets/model/misclassified/misclassified_data.pt"
-MODEL_PATH = "assets/model/CustomResNet.pt"
+CHECKPOINT_PATH = "./assets/model/model_best_epoch.ckpt"
+MISCLASSIFIED_PATH = "./assets/model/Misclassified_Data.pt"
+MODEL_PATH = "./assets/model/CustomResNet.pt"
 
 # Set seed value for reproducibility
 SEED = 53
@@ -32,3 +32,9 @@ CIFAR_CLASSES = tuple(
         "truck",
     ]
 )
+
+
+# Needed to load model module
+# What is the start LR and weight decay you'd prefer?
+PREFERRED_START_LR = 5e-3
+PREFERRED_WEIGHT_DECAY = 1e-5
