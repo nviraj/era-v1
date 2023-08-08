@@ -377,9 +377,9 @@ class CustomResNet(pl.LightningModule):
                 incorrect_indices = ~output.eq(target)
 
                 # Store images incorrectly predicted, generated predictions and the actual value
-                self.misclassified_image_data["images"].extend(data[incorrect_indices].detach())
-                self.misclassified_image_data["ground_truths"].extend(target[incorrect_indices].detach())
-                self.misclassified_image_data["predicted_vals"].extend(pred[incorrect_indices].detach())
+                self.misclassified_image_data["images"].extend(data[incorrect_indices])
+                self.misclassified_image_data["ground_truths"].extend(target[incorrect_indices])
+                self.misclassified_image_data["predicted_vals"].extend(pred[incorrect_indices])
 
     # training function
     def training_step(self, batch, batch_idx):
