@@ -17,6 +17,7 @@ import numpy as np
 import torch
 import torchvision
 from modules.custom_resnet import CustomResNet
+from modules.visualize import convert_back_image, plot_gradcam_images, plot_misclassified_images
 from PIL import Image
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
@@ -60,19 +61,49 @@ classes = config.CIFAR_CLASSES
 #     return confidences, visualization
 
 
-def hello_world(img, transparency=0.5, target_layer_number=-1):
-    return "Hello World!"
+def get_target_layer(layer_name):
+    """Get target layer for visualization"""
+    if layer_name == "prep":
+        return [model.prep[-1]]
+    elif layer_name == "layer1_x":
+        return [model.layer1_x[-1]]
+    elif layer_name == "layer1_r1":
+        return [model.layer1_r1[-1]]
+    elif layer_name == "layer2":
+        return [model.layer2[-1]]
+    elif layer_name == "layer3_x":
+        return [model.layer3_x[-1]]
+    elif layer_name == "layer3_r2":
+        return [model.layer3_r2[-1]]
+    else:
+        return None
+
+
+model_layer_names = ["prep", "layer1_x", "layer1_r1", "layer2", "layer3_x", "layer3_r2"]
+
+
+def app_interface():
+    """Function which provides the Gradio interface"""
+    pass
 
 
 TITLE = "CIFAR10 Image classification using a Custom ResNet Model"
 DESCRIPTION = "Gradio App to infer using a Custom ResNet model and get GradCAM results"
 examples = [["cat.jpg", 0.5, -1], ["dog.jpg", 0.5, -1]]
 demo = gr.Interface(
-    hello_world,
+    app_interface,
     inputs=[
-        gr.Image(shape=(32, 32), label="Input Image"),
-        gr.Slider(0, 1, value=0.5, label="Opacity of GradCAM"),
-        gr.Slider(-2, -1, value=-2, step=1, label="Which Layer?"),
+        # This accepts the image after resizing it to 32x32 which is what our model expects
+        gr.Image(shape=(32, 32)),
+        gr.Number(value=3, maximum=10, minimum=1, step=1.0, precision=0, label="#Classes to show"),
+        gr.Checkbox(True, label="Show GradCAM Image"),
+        gr.Dropdown(model_layer_names, value="layer3_x", label="Visulalization Layer from Model"),
+        # How much should the image be overlayed on the original image
+        gr.Slider(0, 1, 0.6, label="Image Overlay Factor"),
+        gr.Checkbox(True, label="Show Misclassified Images?"),
+        gr.Slider(value=10, maximum=25, minimum=5, step=5.0, precision=0, label="#Misclassified images to show"),
+        gr.Checkbox(True, label="Visulize GradCAM for Misclassified images?"),
+        gr.Slider(value=10, maximum=25, minimum=5, step=5.0, precision=0, label="#GradCAM images to show"),
     ],
     # outputs=[gr.Label(num_top_classes=3), gr.Image(shape=(32, 32), label="Output").style(width=128, height=128)],
     outputs=[],
