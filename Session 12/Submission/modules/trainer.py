@@ -104,8 +104,8 @@ def train_and_test_model(
     print("Saving the model.")
     torch.save(model.state_dict(), config.MODEL_PATH)
 
-    # Save first 100 misclassified images data to a file
-    num_elements = 25
+    # Save first few misclassified images data to a file
+    num_elements = 20
     print(f"Saving first {num_elements} misclassified images.")
     subset_misclassified_image_data = {"images": [], "ground_truths": [], "predicted_vals": []}
     subset_misclassified_image_data["images"] = misclassified_image_data["images"][:num_elements]
