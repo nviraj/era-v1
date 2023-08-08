@@ -54,3 +54,17 @@ def pretty_print_metrics(num_epochs, results):
             f"Test Loss: {test_losses[i]:.4f}, Train Accuracy: {train_acc[i]:.4f}, "
             f"Test Accuracy: {test_acc[i]:.4f}"
         )
+
+
+# Given a file path, extract the folder path and create folder recursively if it does not already exist
+def create_folder_if_not_exists(file_path):
+    """
+    Function to create a folder if it does not exist.
+    """
+    # Extract the folder path
+    folder_path = os.path.dirname(file_path)
+
+    # Create the folder if it does not exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        print(f"Created folder: {folder_path}")

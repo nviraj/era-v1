@@ -5,6 +5,7 @@
 import modules.config as config
 import pytorch_lightning as pl
 import torch
+from modules.utils import create_folder_if_not_exists
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 
 # Import tuner
@@ -102,6 +103,7 @@ def train_and_test_model(
 
     # Save the model using torch save as backup
     print("Saving the model.")
+    create_folder_if_not_exists(config.MODEL_PATH)
     torch.save(model.state_dict(), config.MODEL_PATH)
 
     # Save first few misclassified images data to a file
@@ -111,7 +113,7 @@ def train_and_test_model(
     subset_misclassified_image_data["images"] = misclassified_image_data["images"][:num_elements]
     subset_misclassified_image_data["ground_truths"] = misclassified_image_data["ground_truths"][:num_elements]
     subset_misclassified_image_data["predicted_vals"] = misclassified_image_data["predicted_vals"][:num_elements]
-
+    create_folder_if_not_exists(config.MISCLASSIFIED_PATH)
     torch.save(subset_misclassified_image_data, config.MISCLASSIFIED_PATH)
 
     return trainer, results, misclassified_image_data
