@@ -263,6 +263,7 @@ class CustomResNet(pl.LightningModule):
         # Softmax
         return F.log_softmax(x, dim=-1)
 
+    # Alert: Remove this function later as Tuner is now being used to automatically find the best LR
     def find_optimal_lr(self, train_loader):
         """Use LR Finder to find the best starting learning rate"""
 

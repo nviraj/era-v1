@@ -3,23 +3,6 @@ import os
 
 import torch
 
-# def get_device():
-#     """
-#     Function to get the device to be used for training and testing.
-#     """
-
-#     # Check if cuda is available
-#     cuda = torch.cuda.is_available()
-
-#     # Based on check enable cuda if present, if not available
-#     if cuda:
-#         final_choice = "cuda"
-#     else:
-#         final_choice = "cpu"
-
-#     # pylint: disable=E1101
-#     return final_choice, torch.device(final_choice)
-
 
 def get_num_workers(model_run_location):
     """Given a run mode, return the number of workers to be used for data loading."""
@@ -31,13 +14,6 @@ def get_num_workers(model_run_location):
     num_workers = num_workers if model_run_location == "colab" else 0
 
     return num_workers
-
-
-def get_correct_prediction_count(prediction, label):
-    """
-    Function to get the count of correct predictions.
-    """
-    return prediction.argmax(dim=1).eq(label).sum().item()
 
 
 # Function to save the model

@@ -1,35 +1,21 @@
 """This file contains functions to download and transform the CIFAR10 dataset"""
 # Needed for image transformations
 import albumentations as A
+import modules.config as config
 
 # # Needed for padding issues in albumentations
 # import cv2
 import numpy as np
 from albumentations.pytorch.transforms import ToTensorV2
-from torch.utils.data import DataLoader, Dataset
-from torchvision import datasets
+from torch.utils.data import Dataset
 
 # Use precomputed values for mean and standard deviation of the dataset
-CIFAR_MEAN = (0.4915, 0.4823, 0.4468)
-CIFAR_STD = (0.2470, 0.2435, 0.2616)
-CUTOUT_SIZE = 16
+CIFAR_MEAN = config.CIFAR_MEAN
+CIFAR_STD = config.CIFAR_STD
+CUTOUT_SIZE = config.CUTOUT_SIZE
 
 # Create class labels and convert to tuple
-CIFAR_CLASSES = tuple(
-    c.capitalize()
-    for c in [
-        "plane",
-        "car",
-        "bird",
-        "cat",
-        "deer",
-        "dog",
-        "frog",
-        "horse",
-        "ship",
-        "truck",
-    ]
-)
+CIFAR_CLASSES = config.CIFAR_CLASSES
 
 
 class CIFAR10Transforms(Dataset):
@@ -116,71 +102,9 @@ def apply_cifar_image_transformations(mean=CIFAR_MEAN, std=CIFAR_STD, cutout_siz
     return train_transforms, test_transforms
 
 
-# def split_cifar_data(data_path, train_transforms, test_transforms):
-#     """
-#     Function to download the MNIST data
-#     """
-#     # print("Downloading CIFAR10 dataset\n")
-#     # Download MNIST dataset
-#     train_data = datasets.CIFAR10(data_path, train=True, download=True)
-#     test_data = datasets.CIFAR10(data_path, train=False, download=True)
-
-#     # Calculate and print the mean and standard deviation of the dataset
-#     mean, std = calculate_mean_std(train_data)
-#     # print(f"\nMean: {mean}")
-#     # print(f"Std: {std}")
-
-#     # Apply transforms on the dataset
-#     # Use the above class to apply transforms on the dataset using albumentations
-#     train_data = CIFAR10Transforms(train_data, train_transforms)
-#     test_data = CIFAR10Transforms(test_data, test_transforms)
-
-#     # print("Transformations applied on the dataset")
-
-#     return train_data, test_data
-
-
 def calculate_mean_std(dataset):
     """Function to calculate the mean and standard deviation of CIFAR dataset"""
     data = dataset.data.astype(np.float32) / 255.0
     mean = np.mean(data, axis=(0, 1, 2))
     std = np.std(data, axis=(0, 1, 2))
     return mean, std
-
-
-# def get_cifar_dataloaders(data_path, batch_size, num_workers, seed):
-#     """Get the final train and test data loaders"""
-
-#     ## Data Transformations
-#     train_transforms, test_transforms = apply_cifar_image_transformations(
-#         mean=CIFAR_MEAN, std=CIFAR_STD, cutout_size=CUTOUT_SIZE
-#     )
-
-#     # print(f"Train and test data path: {data_path}")
-
-#     # Train and Test data
-#     # print("Splitting the dataset into train and test\n")
-#     train_data, test_data = split_cifar_data(data_path, train_transforms, test_transforms)
-
-#     # To be passed to dataloader
-#     def _init_fn(worker_id):
-#         np.random.seed(int(seed))
-
-#     # dataloader arguments - something you'll fetch these from cmdprmt
-#     dataloader_args = dict(
-#         shuffle=True,
-#         batch_size=batch_size,
-#         num_workers=num_workers,
-#         pin_memory=True,
-#         worker_init_fn=_init_fn,
-#     )
-
-#     # print(f"Dataloader arguments: {dataloader_args}\n")
-#     # print("Creating train and test dataloaders\n")
-#     # train dataloader
-#     train_loader = DataLoader(train_data, **dataloader_args)
-
-#     # test dataloader
-#     test_loader = DataLoader(test_data, **dataloader_args)
-
-#     return train_loader, test_loader
