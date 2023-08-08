@@ -270,11 +270,11 @@ def train_and_test_model(
 
     # # Obtain the results dictionary from model
     results = model.results
-    print(f"Results Length: {len(results)}")
+    # print(f"Results Length: {len(results)}")
 
     # Get the list of misclassified images
     misclassified_image_data = model.misclassified_image_data
-    print(f"Misclassified Images Length: {len(misclassified_image_data)}")
+    # print(f"Misclassified Images Length: {len(misclassified_image_data)}")
 
     return trainer, results, misclassified_image_data
     # return trainer

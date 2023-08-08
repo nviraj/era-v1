@@ -430,16 +430,16 @@ class CustomResNet(pl.LightningModule):
         """On validation epoch end"""
 
         # Append validation loss and accuracy to results
-        self.results["val_loss"].append(self.trainer.callback_metrics["val_loss"].detach().item())
-        self.results["val_acc"].append(self.trainer.callback_metrics["val_acc"].detach().item())
+        self.results["test_loss"].append(self.trainer.callback_metrics["val_loss"].detach().item())
+        self.results["test_acc"].append(self.trainer.callback_metrics["val_acc"].detach().item())
 
-    # At the end of test epoch append the test loss and accuracy to an instance variable called results
-    def on_test_epoch_end(self):
-        """On test epoch end"""
+    # # At the end of test epoch append the test loss and accuracy to an instance variable called results
+    # def on_test_epoch_end(self):
+    #     """On test epoch end"""
 
-        # Append test loss and accuracy to results
-        self.results["test_loss"].append(self.trainer.callback_metrics["test_loss"].detach().item())
-        self.results["test_acc"].append(self.trainer.callback_metrics["test_acc"].detach().item())
+    #     # Append test loss and accuracy to results
+    #     self.results["test_loss"].append(self.trainer.callback_metrics["test_loss"].detach().item())
+    #     self.results["test_acc"].append(self.trainer.callback_metrics["test_acc"].detach().item())
 
     # At the end of test save misclassified images, the predictions and ground truth in an instance variable called misclassified_image_data
     def on_test_end(self):
