@@ -283,7 +283,7 @@ def train_and_test_model(
         model=model,
         datamodule=datamodule,
         min_lr=PREFERRED_START_LR,
-        max_lr=30,
+        max_lr=5,
         num_training=200,
         mode="linear",
         early_stop_threshold=10,
