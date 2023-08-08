@@ -170,6 +170,7 @@ data/*
 *.pkl
 *.pt
 *.pth
+*.ckpt
 
 # Log folder
 logs/*
