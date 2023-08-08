@@ -364,12 +364,10 @@ class CustomResNet(pl.LightningModule):
 
         # Disable gradient calculation while testing
         with torch.no_grad():
-            for batch in self.trainer.datamodule.test_dataloader():
-                # Move batch to appropriate device
-                batch.to(self.device)
-
+            for batch in self.trainer.test_dataloaders:
                 # Move data and labels to device
                 data, target = batch
+                data, target = data.to(self.device), target.to(self.device)
 
                 # Predict using model
                 pred = self(data)
@@ -383,7 +381,7 @@ class CustomResNet(pl.LightningModule):
                 # Store images incorrectly predicted, generated predictions and the actual value
                 self.misclassified_image_data["images"].extend(data[incorrect_indices])
                 self.misclassified_image_data["ground_truths"].extend(target[incorrect_indices])
-                self.misclassified_image_data["predicted_vals"].extend(pred[incorrect_indices])
+                self.misclassified_image_data["predicted_vals"].extend(output[incorrect_indices])
 
     # training function
     def training_step(self, batch, batch_idx):
@@ -449,5 +447,6 @@ class CustomResNet(pl.LightningModule):
     def on_test_end(self):
         """On test end"""
 
-        # # Get misclassified images
-        # self.store_misclassified_images()
+        print("Test ended! Saving misclassified images")
+        # Get misclassified images
+        self.store_misclassified_images()
