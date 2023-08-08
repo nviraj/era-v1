@@ -5,6 +5,7 @@
 # https://lightning.ai/docs/pytorch/stable/starter/converting.html
 # https://lightning.ai/docs/pytorch/stable/notebooks/lightning_examples/cifar10-baseline.html
 
+import modules.config as config
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -16,8 +17,8 @@ from torch_lr_finder import LRFinder
 from torchmetrics import Accuracy
 
 # What is the start LR and weight decay you'd prefer?
-PREFERRED_START_LR = 3e-2
-PREFERRED_WEIGHT_DECAY = 1e-5
+PREFERRED_START_LR = config.PREFERRED_START_LR
+PREFERRED_WEIGHT_DECAY = config.PREFERRED_WEIGHT_DECAY
 
 
 def detailed_model_summary(model, input_size):
@@ -76,6 +77,9 @@ class CustomResNet(pl.LightningModule):
 
         # Save misclassified images
         self.misclassified_image_data = {"images": [], "ground_truths": [], "predicted_vals": []}
+
+        # LR
+        self.learning_rate = PREFERRED_START_LR
 
         #  Model Notes
 
@@ -287,19 +291,19 @@ class CustomResNet(pl.LightningModule):
     # optimiser function
     def configure_optimizers(self):
         """Add ADAM optimizer to the lightning module"""
-        optimizer = optim.Adam(self.parameters(), lr=PREFERRED_START_LR, weight_decay=PREFERRED_WEIGHT_DECAY)
+        optimizer = optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=PREFERRED_WEIGHT_DECAY)
 
         # Percent start for OneCycleLR
         # Handles the case where max_epochs is less than 5
         percent_start = 5 / int(self.trainer.max_epochs)
-        if percent_start > 1:
+        if percent_start >= 1:
             percent_start = 0.3
 
         # https://lightning.ai/docs/pytorch/stable/common/optimization.html#total-stepping-batches
         scheduler_dict = {
             "scheduler": OneCycleLR(
                 optimizer=optimizer,
-                max_lr=self.lr_finder,
+                max_lr=self.learning_rate,
                 total_steps=int(self.trainer.estimated_stepping_batches),
                 pct_start=percent_start,
                 div_factor=100,
@@ -400,8 +404,8 @@ class CustomResNet(pl.LightningModule):
         # Compute loss and accuracy
         loss, acc = self.compute_metrics(batch)
 
-        self.log("val_loss", loss, prog_bar=False, on_epoch=True, logger=True)
-        self.log("val_acc", acc, prog_bar=False, on_epoch=True, logger=True)
+        self.log("val_loss", loss, prog_bar=True, on_epoch=True, logger=True)
+        self.log("val_acc", acc, prog_bar=True, on_epoch=True, logger=True)
         # Return validation loss
         return loss
 

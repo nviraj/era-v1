@@ -4,11 +4,14 @@
 
 import modules.config as config
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from pytorch_lightning.profilers import AdvancedProfiler, SimpleProfiler
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 
-# Define all the required pytorch lightning callbacks
-lr_monitor = LearningRateMonitor(logging_interval="step")
+# Import tuner
+from pytorch_lightning.tuner.tuning import Tuner
+
+# What is the start LR and weight decay you'd prefer?
+PREFERRED_START_LR = config.PREFERRED_START_LR
+PREFERRED_WEIGHT_DECAY = config.PREFERRED_WEIGHT_DECAY
 
 
 ############# Train and Test Functions #############
@@ -231,7 +234,9 @@ def train_and_test_model(
         dirpath=config.CHECKPOINT_PATH, monitor="val_acc", mode="max", filename="model_best_epoch", save_last=True
     )
     # # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.LearningRateMonitor.html#learningratemonitor
-    # lr_rate_monitor = LearningRateMonitor(logging_interval="epoch", log_momentum=True)
+    lr_rate_monitor = LearningRateMonitor(logging_interval="epoch", log_momentum=False)
+    # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelSummary.html#lightning.pytorch.callbacks.ModelSummary
+    model_summary = ModelSummary(max_depth=0)
 
     # Change trainer settings for debugging
     if debug:
@@ -259,11 +264,27 @@ def train_and_test_model(
         # num_sanity_val_steps=5,
         profiler=profiler,
         # check_val_every_n_epoch=1,
-        # callbacks=[checkpoint, lr_rate_monitor],
-        callbacks=[checkpoint],
+        callbacks=[checkpoint, lr_rate_monitor, model_summary],
+        # callbacks=[checkpoint],
     )
 
-    model.lr_finder = model.find_optimal_lr(train_loader=datamodule.train_dataloader())
+    # # Using the learning rate finder
+    # model.learning_rate = model.find_optimal_lr(train_loader=datamodule.train_dataloader())
+
+    # Using the lr_find from Trainer.tune method instead
+    # https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.tuner.tuning.Tuner.html#lightning.pytorch.tuner.tuning.Tuner
+    # https://www.youtube.com/watch?v=cLZv0eZQSIE
+    tuner = Tuner(trainer)
+    tuner.lr_find(
+        model=model,
+        datamodule=datamodule,
+        min_lr=PREFERRED_START_LR,
+        max_lr=30,
+        num_training=200,
+        mode="linear",
+        early_stop_threshold=4,
+        attr_name="learning_rate",
+    )
 
     trainer.fit(model, datamodule=datamodule)
     trainer.test(model, dataloaders=datamodule.test_dataloader())
