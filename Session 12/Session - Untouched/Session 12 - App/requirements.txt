@@ -1,0 +1,6 @@
+torch
+torchvision
+torch-lr-finder
+grad-cam
+pillow
+numpy
