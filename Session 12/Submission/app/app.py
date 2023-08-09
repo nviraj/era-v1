@@ -75,30 +75,30 @@ def generate_prediction(input_image, num_classes=3, show_gradcam=True, transpare
         orginal_img = input_image
         input_image = transform(input_image).unsqueeze(0).to(cpu)
         # print(f"Input Device: {input_image.device}")
-        outputs = model(input_image).to(cpu)
+        model_output = model(input_image).to(cpu)
         # print(f"Output Device: {outputs.device}")
-        o = torch.exp(outputs).to(cpu)
+        output_exp = torch.exp(model_output).to(cpu)
         # print(f"Output Exp Device: {o.device}")
 
-        o_np = np.squeeze(np.asarray(o.numpy()))
+        output_numpy = np.squeeze(np.asarray(output_exp.numpy()))
         # get indexes of probabilties in descending order
-        sorted_indexes = np.argsort(o_np)[::-1]
+        sorted_indexes = np.argsort(output_numpy)[::-1]
         # sort the probabilities in descending order
         # final_class = classes[o_np.argmax()]
 
         confidences = {}
-        for cnt in range(int(num_classes)):
+        for _ in range(int(num_classes)):
             # set the confidence of highest class with highest probability
-            confidences[classes[sorted_indexes[cnt]]] = float(o_np[sorted_indexes[cnt]])
+            confidences[classes[sorted_indexes[_]]] = float(output_numpy[sorted_indexes[_]])
 
     # Show Grad Cam
     if show_gradcam:
         # Get the target layer
         target_layers = get_target_layer(layer_name)
         cam = GradCAM(model=model, target_layers=target_layers, use_cuda=False)
-        grayscale_cam = cam(input_tensor=input_image, targets=None)
-        grayscale_cam = grayscale_cam[0, :]
-        display_image = show_cam_on_image(orginal_img / 255, grayscale_cam, use_rgb=True, image_weight=transparency)
+        cam_generated = cam(input_tensor=input_image, targets=None)
+        cam_generated = cam_generated[0, :]
+        display_image = show_cam_on_image(orginal_img / 255, cam_generated, use_rgb=True, image_weight=transparency)
     else:
         display_image = orginal_img
 
