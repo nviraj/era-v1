@@ -35,7 +35,7 @@ model.load_state_dict(torch.load(config.MODEL_PATH, map_location=cpu), strict=Fa
 model.to(cpu)
 # Make the model in evaluation mode
 model.eval()
-print(f"Model Device: {next(model.parameters()).device}")
+# print(f"Model Device: {next(model.parameters()).device}")
 
 
 # Load the misclassified images data
@@ -66,7 +66,7 @@ def get_target_layer(layer_name):
 
 
 def generate_prediction(input_image, num_classes=3, show_gradcam=True, transparency=0.6, layer_name="layer3_x"):
-    """ "Given an input image, generate the prediction, confidence and visualization"""
+    """ "Given an input image, generate the prediction, confidence and display_image"""
     mean = list(config.CIFAR_MEAN)
     std = list(config.CIFAR_STD)
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
@@ -74,17 +74,17 @@ def generate_prediction(input_image, num_classes=3, show_gradcam=True, transpare
     with torch.no_grad():
         orginal_img = input_image
         input_image = transform(input_image).unsqueeze(0).to(cpu)
-        print(f"Input Device: {input_image.device}")
+        # print(f"Input Device: {input_image.device}")
         outputs = model(input_image).to(cpu)
-        print(f"Output Device: {outputs.device}")
+        # print(f"Output Device: {outputs.device}")
         o = torch.exp(outputs).to(cpu)
-        print(f"Output Exp Device: {o.device}")
+        # print(f"Output Exp Device: {o.device}")
 
         o_np = np.squeeze(np.asarray(o.numpy()))
         # get indexes of probabilties in descending order
         sorted_indexes = np.argsort(o_np)[::-1]
         # sort the probabilities in descending order
-        final_class = classes[o_np.argmax()]
+        # final_class = classes[o_np.argmax()]
 
         confidences = {}
         for cnt in range(int(num_classes)):
@@ -98,11 +98,11 @@ def generate_prediction(input_image, num_classes=3, show_gradcam=True, transpare
         cam = GradCAM(model=model, target_layers=target_layers, use_cuda=False)
         grayscale_cam = cam(input_tensor=input_image, targets=None)
         grayscale_cam = grayscale_cam[0, :]
-        visualization = show_cam_on_image(orginal_img / 255, grayscale_cam, use_rgb=True, image_weight=transparency)
+        display_image = show_cam_on_image(orginal_img / 255, grayscale_cam, use_rgb=True, image_weight=transparency)
     else:
-        visualization = orginal_img
+        display_image = orginal_img
 
-    return final_class, confidences, visualization
+    return confidences, display_image
 
 
 def app_interface(
@@ -118,10 +118,8 @@ def app_interface(
 ):
     """Function which provides the Gradio interface"""
 
-    # Get the prediction for the input image along with confidence and visualization
-    final_class, confidences, visualization = generate_prediction(
-        input_image, num_classes, show_gradcam, transparency, layer_name
-    )
+    # Get the prediction for the input image along with confidence and display_image
+    confidences, display_image = generate_prediction(input_image, num_classes, show_gradcam, transparency, layer_name)
 
     if show_misclassified:
         misclassified_fig, misclassified_axs = plot_misclassified_images(
@@ -149,7 +147,7 @@ def app_interface(
     # del misclassified_axs
     # del gradcam_axs
 
-    return final_class, confidences, visualization, misclassified_fig, gradcam_fig
+    return confidences, display_image, misclassified_fig, gradcam_fig
 
 
 TITLE = "CIFAR10 Image classification using a Custom ResNet Model"
@@ -182,11 +180,12 @@ inference_app = gr.Interface(
         gr.Slider(value=10, maximum=25, minimum=5, step=5.0, precision=0, label="#GradCAM images to show"),
     ],
     outputs=[
-        gr.Textbox(label="Top Class", container=True),
-        gr.Label(label="Confidences", container=True),
-        gr.Image(shape=(32, 32), label="Grad CAM/ Input Image", container=True).style(width=256, height=256),
-        gr.Plot(label="Misclassified images", container=True),
-        gr.Plot(label="Grad CAM of Misclassified images"),
+        gr.Label(label="Confidences", container=True, show_label=True),
+        gr.Image(shape=(32, 32), label="Grad CAM/ Input Image", container=True, show_label=True).style(
+            width=256, height=256
+        ),
+        gr.Plot(label="Misclassified images", container=True, show_label=True),
+        gr.Plot(label="Grad CAM of Misclassified images", container=True, show_label=True),
     ],
     title=TITLE,
     description=DESCRIPTION,
