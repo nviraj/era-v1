@@ -1,8 +1,6 @@
 {
-  "python.condaPath": "conda",
   "python.terminal.activateEnvironment": true,
   "python.defaultInterpreterPath": "D:\\Apps\\miniforge3\\envs\\era-v1\\python.exe",
-  "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
   {
     "[markdown]": {
       "files.trimTrailingWhitespace": false
